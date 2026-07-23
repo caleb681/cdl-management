@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDL Management | Growth Marketing for Flooring Showrooms</title>
+<meta name="description" content="CDL Management helps independent flooring showrooms dominate local search and get more customers. SEO, GEO, a flooring CRM, and managed ads, backed by a 90-day lead guarantee.">
+<style>
+  :root{
+    --ink:#0B1220;        /* deep navy-black */
+    --ink-2:#111a2e;
+    --panel:#0f1a30;
+    --line:rgba(255,255,255,.10);
+    --line-dark:rgba(11,18,32,.12);
+    --mute:#8b97ad;
+    --mute-2:#5a6478;
+    --paper:#ffffff;
+    --paper-2:#f5f7fb;
+    --accent:#FF6A2B;     /* electric amber-orange */
+    --accent-2:#FFB03A;
+    --green:#25c17a;
+    --radius:18px;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:#0B1220;background:#fff;line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;justify-content:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#1a0d02;font-weight:800;letter-spacing:.2px;
+    padding:16px 26px;border-radius:60px;border:0;cursor:pointer;
+    font-size:16px;transition:transform .15s ease,box-shadow .15s ease;
+    box-shadow:0 10px 30px rgba(255,106,43,.35);
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,106,43,.45)}
+  .btn.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.25);box-shadow:none}
+  .btn.ghost:hover{border-color:#fff;background:rgba(255,255,255,.06)}
+  .btn.dark{background:var(--ink);color:#fff;box-shadow:0 10px 30px rgba(11,18,32,.25)}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    text-transform:uppercase;letter-spacing:2.5px;font-size:12px;font-weight:800;
+    color:var(--accent);
+  }
+  .eyebrow.on-dark{color:var(--accent-2)}
+
+  /* NAV */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .logo{display:flex;align-items:center;gap:11px;color:#fff;font-weight:800;font-size:19px;letter-spacing:.3px}
+  .logo .mark{
+    width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a0d02;font-weight:900;font-size:15px;
+  }
+  .logo small{display:block;font-size:10px;font-weight:600;letter-spacing:2px;color:var(--mute);text-transform:uppercase;margin-top:-2px}
+  .nav-links{display:flex;align-items:center;gap:30px}
+  .nav-links a{color:#c7d0e0;font-weight:600;font-size:15px}
+  .nav-links a:hover{color:#fff}
+  .nav .btn{padding:11px 20px;font-size:14px}
+  @media(max-width:860px){.nav-links a:not(.btn){display:none}}
+
+  /* HERO */
+  .hero{position:relative;background:
+      radial-gradient(1000px 600px at 78% -8%,rgba(255,106,43,.20),transparent 60%),
+      radial-gradient(800px 500px at 8% 20%,rgba(255,176,58,.10),transparent 55%),
+      var(--ink);
+    color:#fff;overflow:hidden;padding:88px 0 100px}
+  .hero:after{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:56px 56px;mask-image:radial-gradient(700px 500px at 75% 10%,#000,transparent 70%);opacity:.5}
+  .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+  .hero h1{font-size:56px;line-height:1.04;letter-spacing:-1.5px;font-weight:900;margin:20px 0 20px}
+  .hero h1 span{background:linear-gradient(120deg,var(--accent-2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.sub{font-size:19px;color:#c7d0e0;max-width:560px;margin-bottom:32px}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-note{margin-top:20px;color:var(--mute);font-size:14px;display:flex;align-items:center;gap:9px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(37,193,122,.18)}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:36px}.hero h1{font-size:40px}}
+
+  /* Hero card */
+  .gcard{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+    border:1px solid var(--line);border-radius:22px;padding:26px;backdrop-filter:blur(6px)}
+  .gcard h4{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mute);margin-bottom:18px}
+  .rank-row{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:13px;margin-bottom:10px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .rank-row.win{background:linear-gradient(135deg,rgba(255,106,43,.20),rgba(255,176,58,.08));border-color:rgba(255,176,58,.35)}
+  .rank-badge{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:14px;background:rgba(255,255,255,.10);color:#fff;flex:none}
+  .rank-row.win .rank-badge{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a0d02}
+  .rank-name{font-weight:700;font-size:15px}
+  .rank-sub{font-size:12px;color:var(--mute)}
+  .rank-row.win .rank-sub{color:#ffd9bf}
+  .rank-tag{margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-2)}
+
+  /* trust strip */
+  .trust{background:var(--ink-2);color:#93a0b8;padding:20px 0;border-bottom:1px solid var(--line)}
+  .trust .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;font-weight:700;font-size:14px;letter-spacing:.3px}
+  .trust b{color:#fff}
+
+  /* SECTION base */
+  section{padding:92px 0}
+  .center{text-align:center;max-width:720px;margin:0 auto 56px}
+  h2{font-size:40px;line-height:1.1;letter-spacing:-1px;font-weight:900;margin:14px 0 16px}
+  .lead{font-size:18px;color:#51607a}
+  @media(max-width:900px){h2{font-size:30px}}
+
+  /* PROBLEM */
+  .prob{background:var(--paper-2)}
+  .prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .pcard{background:#fff;border:1px solid #e7ecf4;border-radius:16px;padding:28px;box-shadow:0 1px 0 rgba(16,24,40,.02)}
+  .pcard .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#fff2ec;margin-bottom:16px}
+  .pcard h3{font-size:19px;font-weight:800;margin-bottom:8px}
+  .pcard p{color:#51607a;font-size:15px}
+  @media(max-width:860px){.prob-grid{grid-template-columns:1fr}}
+
+  /* SERVICES */
+  .svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  .scard{position:relative;border:1px solid #e7ecf4;border-radius:18px;padding:32px;overflow:hidden;transition:border-color .2s,transform .2s}
+  .scard:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .scard .num{font-size:13px;font-weight:900;color:var(--accent);letter-spacing:1px}
+  .scard h3{font-size:22px;font-weight:850;margin:12px 0 10px}
+  .scard p{color:#51607a;font-size:15.5px}
+  .scard ul{list-style:none;margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  .scard li{font-size:12.5px;font-weight:700;color:#2b3a55;background:var(--paper-2);border:1px solid #e7ecf4;padding:6px 11px;border-radius:30px}
+  @media(max-width:860px){.svc-grid{grid-template-columns:1fr}}
+
+  /* EDGE / why us */
+  .edge{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+  .edge:after{content:"";position:absolute;inset:0;background:radial-gradient(700px 400px at 85% 20%,rgba(255,106,43,.16),transparent 60%)}
+  .edge .wrap{position:relative;z-index:2}
+  .edge-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .edge h2{color:#fff}
+  .edge p.lead{color:#b9c4d8}
+  .edge-list{display:grid;gap:18px;margin-top:10px}
+  .eitem{display:flex;gap:16px;align-items:flex-start}
+  .eitem .ck{flex:none;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a0d02;display:grid;place-items:center;font-weight:900}
+  .eitem h4{font-size:17px;font-weight:800;margin-bottom:3px}
+  .eitem p{color:#9fabc2;font-size:15px}
+  @media(max-width:860px){.edge-grid{grid-template-columns:1fr;gap:36px}}
+
+  /* GUARANTEE */
+  .guar{background:linear-gradient(135deg,#fff6f0,#fff);}
+  .guar-box{border:2px solid var(--accent);border-radius:24px;padding:48px;background:#fff;box-shadow:0 30px 70px rgba(255,106,43,.12);text-align:center;position:relative}
+  .guar-badge{position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a0d02;font-weight:900;letter-spacing:1px;text-transform:uppercase;font-size:12px;padding:9px 20px;border-radius:40px}
+  .guar-box h2{margin-top:8px}
+  .guar-box .big{font-size:22px;color:#2b3a55;max-width:680px;margin:0 auto 10px;font-weight:600}
+  .guar-box .big b{color:var(--accent)}
+  .guar-fine{color:#8a97ad;font-size:14px;margin-top:14px}
+
+  /* PRICING */
+  .price{background:var(--paper-2)}
+  .price-grid{display:grid;grid-template-columns:1fr;max-width:640px;margin:0 auto}
+  .plan{background:var(--ink);color:#fff;border-radius:24px;padding:40px;position:relative;overflow:hidden}
+  .plan:after{content:"";position:absolute;inset:0;background:radial-gradient(500px 300px at 90% 0%,rgba(255,106,43,.18),transparent 60%)}
+  .plan>*{position:relative;z-index:2}
+  .plan .pname{font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--accent-2);font-weight:800}
+  .plan .ptag{color:#b9c4d8;margin:6px 0 24px}
+  .price-rows{display:grid;gap:2px;border-radius:16px;overflow:hidden;border:1px solid var(--line);margin-bottom:26px}
+  .prow{display:flex;justify-content:space-between;align-items:baseline;padding:18px 20px;background:rgba(255,255,255,.04)}
+  .prow .lbl{font-weight:700}
+  .prow .lbl small{display:block;color:var(--mute);font-weight:500;font-size:12.5px;margin-top:2px}
+  .prow .val{font-size:22px;font-weight:900}
+  .prow .val span{font-size:13px;color:var(--mute);font-weight:600}
+  .plan-feat{list-style:none;display:grid;gap:11px;margin-bottom:28px}
+  .plan-feat li{display:flex;gap:11px;align-items:flex-start;color:#d7deea;font-size:15px}
+  .plan-feat li:before{content:"✓";color:var(--accent-2);font-weight:900;flex:none}
+  .plan .btn{width:100%}
+  .price-note{text-align:center;color:#51607a;margin-top:22px;font-size:14.5px}
+  .tiers{max-width:640px;margin:26px auto 0;border:1px solid #e7ecf4;border-radius:16px;overflow:hidden;background:#fff}
+  .tiers .th{display:flex;justify-content:space-between;padding:14px 20px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+  .tiers .tr{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-top:1px solid #eef1f7;font-size:15.5px}
+  .tiers .tr .adspend{font-weight:700;color:#2b3a55}
+  .tiers .tr .fee{font-weight:900;color:var(--ink)}
+  .tiers .cap{padding:13px 20px;background:var(--paper-2);color:#51607a;font-size:13px;border-top:1px solid #eef1f7}
+
+  /* STEPS */
+  .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;counter-reset:s}
+  .step{padding:30px;border:1px solid #e7ecf4;border-radius:18px;position:relative}
+  .step .n{counter-increment:s;font-size:15px;font-weight:900;color:#1a0d02;background:linear-gradient(135deg,var(--accent),var(--accent-2));width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:16px}
+  .step .n:before{content:counter(s)}
+  .step h3{font-size:19px;font-weight:800;margin-bottom:8px}
+  .step p{color:#51607a;font-size:15px}
+  @media(max-width:860px){.steps-grid{grid-template-columns:1fr}}
+
+  /* FAQ */
+  .faq{background:var(--paper-2)}
+  .faq-list{max-width:800px;margin:0 auto;display:grid;gap:12px}
+  details{background:#fff;border:1px solid #e7ecf4;border-radius:14px;padding:4px 22px;transition:border-color .2s}
+  details[open]{border-color:var(--accent)}
+  summary{list-style:none;cursor:pointer;font-weight:800;font-size:17px;padding:18px 0;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary .pm{color:var(--accent);font-size:22px;transition:transform .2s}
+  details[open] summary .pm{transform:rotate(45deg)}
+  details p{color:#51607a;padding:0 0 20px;font-size:15.5px}
+
+  /* APPLY */
+  .apply{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+  .apply:after{content:"";position:absolute;inset:0;background:
+    radial-gradient(700px 400px at 15% 10%,rgba(255,106,43,.16),transparent 60%),
+    radial-gradient(600px 400px at 90% 90%,rgba(255,176,58,.10),transparent 60%)}
+  .apply .wrap{position:relative;z-index:2}
+  .apply-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:start}
+  .apply h2{color:#fff}
+  .apply .lead{color:#b9c4d8}
+  .apply-why{display:grid;gap:16px;margin-top:26px}
+  .apply-why .eitem p{color:#9fabc2}
+  form{background:#fff;color:#0B1220;border-radius:22px;padding:32px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+  .field input,.field select,.field textarea{
+    width:100%;padding:13px 15px;border:1.5px solid #dfe5ef;border-radius:11px;font-size:15px;font-family:inherit;background:#fbfcfe;transition:border-color .15s,box-shadow .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,43,.12);background:#fff}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  form .btn{width:100%;margin-top:8px}
+  .form-fine{text-align:center;color:#8a97ad;font-size:12.5px;margin-top:14px}
+  .success{display:none;text-align:center;padding:20px 8px}
+  .success.show{display:block}
+  .success .ok{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--green),#4bd897);color:#fff;font-size:30px;display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 12px 30px rgba(37,193,122,.35)}
+  .success h3{font-size:24px;margin-bottom:10px}
+  .success p{color:#51607a;margin-bottom:20px}
+  @media(max-width:860px){.apply-grid{grid-template-columns:1fr;gap:34px}.frow{grid-template-columns:1fr}}
+
+  /* FOOTER */
+  footer{background:#070c16;color:#7d8aa2;padding:54px 0 34px}
+  .foot-top{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:24px}
+  .foot-top .logo small{color:#5f6c85}
+  .foot-links{display:flex;gap:26px;flex-wrap:wrap}
+  .foot-links a:hover{color:#fff}
+  .foot-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#top" class="logo"><span class="mark">CDL</span><span>CDL Management<small>Flooring Growth</small></span></a>
+    <nav class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#edge">Why CDL</a>
+      <a href="#guarantee">Guarantee</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#apply" class="btn">Apply Now</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top" style="padding-top:72px">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow on-dark">● Marketing built only for flooring showrooms</span>
+      <h1>Become the flooring store your town <span>finds first.</span></h1>
+      <p class="sub">CDL Management gets independent flooring showrooms to the top of local search, fills your CRM with real buyers, and runs the ads, so you sell more floors without becoming a marketer.</p>
+      <div class="hero-cta">
+        <a href="#apply" class="btn">Apply for a Growth Audit →</a>
+        <a href="#edge" class="btn ghost">See how it works</a>
+      </div>
+      <div class="hero-note"><span class="dot"></span> 90-day lead guarantee · Month-to-month · No long contracts</div>
+    </div>
+
+    <div class="gcard" aria-hidden="true">
+      <h4>"Flooring store near me" in your city</h4>
+      <div class="rank-row win">
+        <span class="rank-badge">1</span>
+        <div><div class="rank-name">Your Showroom</div><div class="rank-sub">4.9 ★ · 214 reviews · Open now</div></div>
+        <span class="rank-tag">With CDL</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-badge">2</span>
+        <div><div class="rank-name">Big-Box Flooring Dept.</div><div class="rank-sub">3.8 ★ · 96 reviews</div></div>
+      </div>
+      <div class="rank-row">
+        <span class="rank-badge">3</span>
+        <div><div class="rank-name">Competitor Carpets</div><div class="rank-sub">4.2 ★ · 41 reviews</div></div>
+      </div>
+      <div class="rank-row" style="opacity:.5">
+        <span class="rank-badge">9</span>
+        <div><div class="rank-name">Where most showrooms sit today</div><div class="rank-sub">Page 1, bottom. Invisible.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<div class="trust">
+  <div class="wrap">
+    <span>SEO &amp; <b>GEO</b></span>
+    <span>Flooring <b>CRM</b></span>
+    <span>Managed <b>Facebook &amp; Google Ads</b></span>
+    <span>Google Business Profile <b>Optimization</b></span>
+    <span><b>90-Day</b> Lead Guarantee</span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="prob">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">The real problem</span>
+      <h2>Great showrooms are losing to worse ones online</h2>
+      <p class="lead">You carry better product and give better service, but the customer never finds you. They pick whoever shows up first on their phone. That's a marketing problem, not a flooring problem.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="pcard">
+        <div class="ic">🔎</div>
+        <h3>You're buried in search</h3>
+        <p>If you're not in Google's top 3 map results for "flooring store near me," most buyers never scroll far enough to see you.</p>
+      </div>
+      <div class="pcard">
+        <div class="ic">🕸️</div>
+        <h3>Your website is quietly leaking</h3>
+        <p>Slow, not mobile-friendly, no way to capture a lead. Visitors bounce and you never even know they were there.</p>
+      </div>
+      <div class="pcard">
+        <div class="ic">📉</div>
+        <h3>Leads fall through the cracks</h3>
+        <p>Calls go unanswered, quotes never get followed up. Without a system, every busy week costs you sales you already earned.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">What you get</span>
+      <h2>One team that runs your entire growth engine</h2>
+      <p class="lead">No more juggling a web guy, an ad guy, and a CRM you never set up. CDL Management handles all of it, built specifically for how flooring showrooms actually get customers.</p>
+    </div>
+    <div class="svc-grid">
+      <div class="scard">
+        <div class="num">01</div>
+        <h3>SEO &amp; GEO Optimization</h3>
+        <p>We get your showroom ranking for the searches that bring in ready-to-buy local customers, and keep you visible in AI-driven and map-based "near me" results as search changes.</p>
+        <ul><li>Local SEO</li><li>Google Business Profile</li><li>AI / GEO visibility</li><li>Review growth</li></ul>
+      </div>
+      <div class="scard">
+        <div class="num">02</div>
+        <h3>Your Flooring CRM</h3>
+        <p>An all-in-one CRM built for flooring showrooms that captures every lead, texts and emails back automatically, and follows up until they buy, so no quote ever slips through the cracks again.</p>
+        <ul><li>Lead capture</li><li>Auto follow-up</li><li>Missed-call text-back</li><li>Pipeline &amp; reviews</li></ul>
+      </div>
+      <div class="scard">
+        <div class="num">03</div>
+        <h3>Managed Facebook &amp; Google Ads</h3>
+        <p>We build, run, and optimize paid campaigns that put your showroom in front of homeowners planning a floor, and we manage the spend so every dollar is working.</p>
+        <ul><li>Facebook / Instagram</li><li>Google Search</li><li>Retargeting</li><li>Creative &amp; copy</li></ul>
+      </div>
+      <div class="scard">
+        <div class="num">04</div>
+        <h3>Market-Specific Optimization</h3>
+        <p>We continuously watch your local market and adjust offers, keywords, targeting, and budget, so your marketing keeps producing customers instead of going stale.</p>
+        <ul><li>Monthly adjustments</li><li>Competitor tracking</li><li>Offer testing</li><li>Reporting</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDGE -->
+<section class="edge" id="edge">
+  <div class="wrap">
+    <div class="edge-grid">
+      <div>
+        <span class="eyebrow on-dark">Why CDL is different</span>
+        <h2>We only do flooring. That's the whole advantage.</h2>
+        <p class="lead">Generic agencies run your showroom off the same playbook they use for dentists and gyms. We've built ours around one industry, so we already know your buyer, your seasons, your margins, and what actually makes the phone ring.</p>
+      </div>
+      <div class="edge-list">
+        <div class="eitem"><div class="ck">✓</div><div><h4>We know the flooring buyer</h4><p>Homeowners mid-remodel, contractors sourcing product, insurance replacements: different messages for each, dialed in from day one.</p></div></div>
+        <div class="eitem"><div class="ck">✓</div><div><h4>We know your market's rhythm</h4><p>We read local demand and competitors in your region and adjust before a slow month happens, not after.</p></div></div>
+        <div class="eitem"><div class="ck">✓</div><div><h4>Built to be replaced by results</h4><p>No annual contracts. We earn the next month by producing the last one, which is why we can put a guarantee behind it.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<section class="guar" id="guarantee">
+  <div class="wrap">
+    <div class="guar-box">
+      <span class="guar-badge">The CDL Guarantee</span>
+      <h2>Qualified leads in 90 days, or we work free until you get them.</h2>
+      <p class="big">We're so confident in our system that we put it in writing: if we don't deliver at least <b>15 qualified local leads</b> in your first 90 days, we keep working at <b>no additional cost</b> until we do.</p>
+      <p class="guar-fine">You carry the risk with most agencies. With CDL, we carry it. Simple as that.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="price" id="pricing">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">Simple, honest pricing</span>
+      <h2>One package. Everything included.</h2>
+      <p class="lead">No confusing tiers or upsells. One complete growth system, priced to pay for itself with a single extra job a month.</p>
+    </div>
+    <div class="price-grid">
+      <div class="plan">
+        <div class="pname">Showroom Growth System</div>
+        <div class="ptag">SEO &amp; GEO · Flooring CRM · Managed Ads · Monthly optimization</div>
+        <div class="price-rows">
+          <div class="prow"><div class="lbl">One-time setup<small>CRM build, website &amp; GEO optimization, tracking, ad accounts</small></div><div class="val">$1,500</div></div>
+          <div class="prow"><div class="lbl">Monthly management<small>Scales with your ad spend (see the table below)</small></div><div class="val">from $1,750<span>/mo</span></div></div>
+          <div class="prow"><div class="lbl">Ad spend<small>Paid directly to Google and Facebook. Your budget, never ours.</small></div><div class="val">from $1,500<span>/mo</span></div></div>
+        </div>
+        <ul class="plan-feat">
+          <li>Local SEO + Google Business Profile optimization</li>
+          <li>GEO / AI-search visibility so you stay found as search changes</li>
+          <li>Your own flooring CRM with automated lead follow-up</li>
+          <li>Fully managed Facebook &amp; Google ad campaigns</li>
+          <li>Monthly market adjustments &amp; transparent reporting</li>
+          <li>Month-to-month · backed by the 90-day lead guarantee</li>
+        </ul>
+        <a href="#apply" class="btn">Apply to Get Started →</a>
+      </div>
+    </div>
+    <div class="tiers">
+      <div class="th"><span>Your monthly ad spend</span><span>Management fee</span></div>
+      <div class="tr"><span class="adspend">Up to $1,500</span><span class="fee">$1,750 / mo</span></div>
+      <div class="tr"><span class="adspend">$1,500 to $3,000</span><span class="fee">$2,500 / mo</span></div>
+      <div class="tr"><span class="adspend">$3,000 to $5,000</span><span class="fee">$3,500 / mo</span></div>
+      <div class="tr"><span class="adspend">Over $5,000</span><span class="fee">$3,500 + 10% of spend over $5,000</span></div>
+      <div class="cap">Higher ad budgets mean more campaigns and more to manage, so the management fee scales with your spend. Either way, every dollar of ad budget goes straight to the platforms.</div>
+    </div>
+    <p class="price-note">Not sure it's a fit? The application is free and comes with a no-obligation growth audit of your current online presence.</p>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section>
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">How it works</span>
+      <h2>From application to more customers in three steps</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step"><div class="n"></div><h3>Apply &amp; get audited</h3><p>Fill out the short application below. We review your showroom's online presence and prepare a free, honest growth audit.</p></div>
+      <div class="step"><div class="n"></div><h3>Strategy call</h3><p>If it's a fit, we hop on a call, walk you through exactly what we'd do for your market, and map out your first 90 days.</p></div>
+      <div class="step"><div class="n"></div><h3>We launch &amp; you grow</h3><p>We build your system and go live, then optimize every month while the guarantee keeps us accountable to real results.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">Questions</span>
+      <h2>Everything you're probably wondering</h2>
+    </div>
+    <div class="faq-list">
+      <details open><summary>Do I have to sign a long contract? <span class="pm">+</span></summary><p>No. Everything is month-to-month. We'd rather earn your business every 30 days by producing results than lock you into something you can't leave.</p></details>
+      <details><summary>Is the ad spend included in the monthly price? <span class="pm">+</span></summary><p>No, and that's on purpose. Your ad budget is paid straight to Google and Facebook so every dollar goes to reaching customers, not to us. Your management fee covers building, running, and optimizing those campaigns plus your SEO, GEO, and CRM.</p></details>
+      <details><summary>What does the CRM actually do? <span class="pm">+</span></summary><p>It's your own CRM that captures every lead from your site and ads, texts and emails them back automatically (including missed-call text-back), and keeps following up until they book, so busy weeks don't cost you sales.</p></details>
+      <details><summary>How does the 90-day guarantee work? <span class="pm">+</span></summary><p>If we don't generate at least 15 qualified local leads in your first 90 days, we keep working at no additional management cost until we do. We define "qualified" together up front so it's crystal clear.</p></details>
+      <details><summary>What if I already have a website? <span class="pm">+</span></summary><p>Great. We'll optimize what you have or rebuild it as part of setup, whichever gets you customers faster. Either way it's covered in the one-time setup fee.</p></details>
+      <details><summary>How soon will I see results? <span class="pm">+</span></summary><p>Paid ads and CRM follow-up can start producing leads within the first couple of weeks. SEO and GEO compound over the following months, which is exactly why the guarantee spans a full 90 days.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- APPLY -->
+<section class="apply" id="apply">
+  <div class="wrap">
+    <div class="apply-grid">
+      <div>
+        <span class="eyebrow on-dark">Apply now</span>
+        <h2>Let's see if we're a fit</h2>
+        <p class="lead">Tell us about your showroom. We'll review it, build your free growth audit, and if it's a match, send you straight to book your strategy call.</p>
+        <div class="apply-why">
+          <div class="eitem"><div class="ck">✓</div><div><h4>Free growth audit</h4><p>A clear look at where you're losing customers online, yours to keep either way.</p></div></div>
+          <div class="eitem"><div class="ck">✓</div><div><h4>No pressure, no obligation</h4><p>We only take on showrooms we're confident we can grow.</p></div></div>
+          <div class="eitem"><div class="ck">✓</div><div><h4>Backed by our guarantee</h4><p>Qualified leads in 90 days, or we work free until you get them.</p></div></div>
+        </div>
+      </div>
+
+      <div>
+        <form id="applyForm" novalidate>
+          <div id="formFields">
+            <div class="field">
+              <label for="name">Your name</label>
+              <input id="name" name="name" type="text" placeholder="First and last name" required>
+            </div>
+            <div class="frow">
+              <div class="field">
+                <label for="showroom">Showroom name</label>
+                <input id="showroom" name="showroom" type="text" placeholder="e.g. Riverside Flooring Co." required>
+              </div>
+              <div class="field">
+                <label for="city">City &amp; state</label>
+                <input id="city" name="city" type="text" placeholder="e.g. Fort Worth, TX" required>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="you@showroom.com" required>
+              </div>
+              <div class="field">
+                <label for="phone">Phone</label>
+                <input id="phone" name="phone" type="tel" placeholder="(555) 555-5555" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="website">Current website (if any)</label>
+              <input id="website" name="website" type="text" placeholder="www.yourshowroom.com or type “none”">
+            </div>
+            <div class="frow">
+              <div class="field">
+                <label for="revenue">Approx. monthly revenue</label>
+                <select id="revenue" name="revenue" required>
+                  <option value="" disabled selected>Select a range</option>
+                  <option>Under $50k / mo</option>
+                  <option>$50k – $100k / mo</option>
+                  <option>$100k – $250k / mo</option>
+                  <option>$250k+ / mo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="goal">Biggest goal</label>
+                <select id="goal" name="goal" required>
+                  <option value="" disabled selected>Select one</option>
+                  <option>More local customers / leads</option>
+                  <option>Rank higher on Google</option>
+                  <option>A system to follow up on leads</option>
+                  <option>Run better ads</option>
+                  <option>All of the above</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn">Submit Application →</button>
+            <p class="form-fine">Takes 60 seconds. We'll review and get back to you within 1 business day.</p>
+          </div>
+
+          <div class="success" id="success">
+            <div class="ok">✓</div>
+            <h3>Application received!</h3>
+            <p>Thanks, we're reviewing your showroom now. The last step is booking your strategy call so we can walk you through your growth audit.</p>
+            <a href="#" class="btn dark" id="bookBtn">Book Your Strategy Call →</a>
+            <p class="form-fine" style="margin-top:16px">Connect your Calendly / GHL booking link here.</p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <a href="#top" class="logo"><span class="mark">CDL</span><span>CDL Management<small>Flooring Growth</small></span></a>
+      <nav class="foot-links">
+        <a href="#services">Services</a>
+        <a href="#edge">Why CDL</a>
+        <a href="#guarantee">Guarantee</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#apply">Apply</a>
+      </nav>
+    </div>
+    <div class="foot-bot">
+      <span>© 2026 CDL Management. Marketing built only for flooring showrooms.</span>
+      <span>SEO · GEO · CRM · Paid Ads</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Application form -> reveal booking step (in-memory only, no storage)
+  var form = document.getElementById('applyForm');
+  var fields = document.getElementById('formFields');
+  var success = document.getElementById('success');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var required = form.querySelectorAll('[required]');
+    var ok = true;
+    required.forEach(function(el){
+      if(!el.value || (el.type==='email' && el.value.indexOf('@')===-1)){ ok=false; el.style.borderColor='#e0483c'; }
+      else { el.style.borderColor='#dfe5ef'; }
+    });
+    if(!ok) return;
+    fields.style.display='none';
+    success.classList.add('show');
+    success.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  document.getElementById('bookBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    alert('Booking link goes here. Connect your Calendly or GHL calendar.');
+  });
+</script>
+</body>
+</html>
