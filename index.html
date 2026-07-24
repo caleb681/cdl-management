@@ -584,9 +584,29 @@
       else { el.style.borderColor='#dfe5ef'; }
     });
     if(!ok) return;
-    fields.style.display='none';
-    success.classList.add('show');
-    success.scrollIntoView({behavior:'smooth', block:'center'});
+    var submitBtn = form.querySelector('button[type=submit]');
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+    var payload = {
+      _subject: 'New CDL application: ' + (document.getElementById('showroom').value || 'Website lead'),
+      name: document.getElementById('name').value,
+      showroom: document.getElementById('showroom').value,
+      city: document.getElementById('city').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      website: document.getElementById('website').value,
+      monthly_revenue: document.getElementById('revenue').value,
+      biggest_goal: document.getElementById('goal').value
+    };
+    var reveal = function(){
+      fields.style.display='none';
+      success.classList.add('show');
+      success.scrollIntoView({behavior:'smooth', block:'center'});
+    };
+    fetch('https://formsubmit.co/ajax/caleb@cdl1.net', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); }).then(reveal).catch(reveal);
   });
   document.getElementById('bookBtn').addEventListener('click', function(e){
     e.preventDefault();
