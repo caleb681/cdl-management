@@ -514,6 +514,13 @@ async function route(context, ctx) {
   if (head === 'intake' && method === 'POST') return handleIntake(context, ctx);
   if (head === 'webhooks') return handleWebhooks(context, ctx);
   if (head === 'digest' && method === 'GET') return handleDigest(context, ctx);
+  if (head === 'brief-email' && method === 'POST') {
+    const secret = ctx.url.searchParams.get('secret') || '';
+    if (!env.WEBHOOK_SECRET || secret !== env.WEBHOOK_SECRET) {
+      return json({ error: 'Unauthorized' }, 401);
+    }
+    return json(await emailTodaysBrief(env));
+  }
   if (head === 'health' && method === 'GET') return json({ ok: true, db: true });
 
   /* ---------- everything below needs a session ---------- */
@@ -529,10 +536,90 @@ async function route(context, ctx) {
   if (head === 'leads') return handleLeads(context, ctx, user);
   if (head === 'clients') return handleClients(context, ctx, user);
   if (head === 'tasks') return handleTasks(context, ctx, user);
+  if (head === 'brief') return handleBrief(context, ctx, user);
   if (head === 'kpis' && method === 'GET') return json(await computeKpis(env));
   if (head === 'users') return handleUsers(context, ctx, user);
 
   return json({ error: 'Not found' }, 404);
+}
+
+/* ------------------------------------------------------------------ *
+ * /api/brief  — the daily brief written by the agent org
+ *
+ * GET /api/brief            today's brief, rendered HTML
+ * GET /api/brief?date=YYYY-MM-DD   a specific day
+ * GET /api/brief/list       the last 30 dates, JSON
+ *
+ * Session required. The org writes rows into the `brief` table; nothing here
+ * generates content, it only serves what the org already produced.
+ * ------------------------------------------------------------------ */
+
+async function handleBrief(context, ctx, user) {
+  const { env } = context;
+  const { url, seg, method } = ctx;
+  if (method !== 'GET') return json({ error: 'Method not allowed' }, 405);
+
+  if (seg[1] === 'list') {
+    const r = await env.DB.prepare(
+      'SELECT run_date, created_at, LENGTH(html) AS bytes FROM brief ORDER BY run_date DESC LIMIT 30'
+    ).all();
+    return json({ briefs: r.results || [] });
+  }
+
+  const date = url.searchParams.get('date');
+  const row = date
+    ? await env.DB.prepare('SELECT run_date, html FROM brief WHERE run_date = ?').bind(date).first()
+    : await env.DB.prepare('SELECT run_date, html FROM brief ORDER BY run_date DESC LIMIT 1').first();
+
+  if (!row || !row.html) {
+    return new Response(briefMissingPage(date), {
+      status: 404,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  return new Response(row.html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'private, no-store',
+      'X-Brief-Date': row.run_date,
+    },
+  });
+}
+
+/** Shown when a brief is asked for and none exists. Says why, rather than 404ing blankly. */
+function briefMissingPage(date) {
+  const what = date ? `for ${escapeHtml(date)}` : 'yet today';
+  return `<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>No brief ${escapeHtml(date || '')}</title>
+<style>body{margin:0;background:#f3f2ee;color:#0b0b0b;font:16px/1.6 system-ui,sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+div{background:#fcfcfb;border:1px solid rgba(11,11,11,.1);border-radius:12px;padding:28px 32px;max-width:520px}
+h1{margin:0 0 10px;font-size:20px}p{margin:0 0 8px;color:#52514e;font-size:14.5px}
+code{background:#f3f2ee;padding:2px 6px;border-radius:4px;font-size:13px}</style></head>
+<body><div><h1>No brief ${what}</h1>
+<p>The agent organisation has not written one. It runs weekdays at 5:30am Central.</p>
+<p>If it is past 6am on a weekday, the run failed. Check the scheduled task, or look
+in D1 <code>cdl-command</code>, table <code>brief</code>.</p>
+<p style="margin-top:14px"><a href="/api/brief/list">See which dates exist</a></p>
+</div></body></html>`;
+}
+
+/** Email today's brief. Called by the cdl-brief-mailer Worker on a cron.
+ *  Auth: WEBHOOK_SECRET, same as the other machine-to-machine routes. */
+async function emailTodaysBrief(env) {
+  const row = await env.DB.prepare(
+    'SELECT run_date, html FROM brief ORDER BY run_date DESC LIMIT 1'
+  ).first();
+  if (!row || !row.html) return { sent: false, error: 'no-brief' };
+
+  const r = await sendEmail(env, {
+    to: alertEmail(env),
+    subject: `CDL Brief, ${row.run_date}`,
+    html: row.html,
+  });
+  return { ...r, run_date: row.run_date };
 }
 
 /* ------------------------------------------------------------------ *
