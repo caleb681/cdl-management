@@ -723,6 +723,9 @@ var NAV = [
   { id: 'dashboard', label: 'Home', icon: ICONS.dashboard },
   { id: 'pipeline', label: 'Pipeline', icon: ICONS.pipeline },
   { id: 'strike', label: 'Strike', icon: ICONS.strike },
+  /* Mission Control lives at /command/dashboard/ and is served by cdl-api
+     behind this same session cookie - the sidebar just links out to it. */
+  { id: 'mission', label: 'Mission Control', icon: ICONS.dashboard, href: '/command/dashboard/' },
   { id: 'clients', label: 'Clients', icon: ICONS.clients },
   { id: 'team', label: 'Team', icon: ICONS.team, ownerOnly: true }
 ];
@@ -1137,6 +1140,10 @@ function renderNav() {
     '<div class="sidesection">Workspace</div>' +
     items.map(function (n) {
       var badge = (n.id === 'strike' && hotCount) ? '<span class="count">' + hotCount + '</span>' : '';
+      if (n.href) {
+        return '<a class="navitem" href="' + attr(n.href) + '" style="text-decoration:none">' +
+          n.icon + '<span>' + esc(n.label) + '</span></a>';
+      }
       return '<button class="navitem' + (S.view === n.id ? ' on' : '') + '" data-nav="' + attr(n.id) + '">' +
         n.icon + '<span>' + esc(n.label) + '</span>' + badge + '</button>';
     }).join('') +
@@ -1146,6 +1153,10 @@ function renderNav() {
 
   $('tabbar').innerHTML = items.map(function (n) {
     var badge = (n.id === 'strike' && hotCount) ? '<span class="dotbadge">' + hotCount + '</span>' : '';
+    if (n.href) {
+      return '<a class="tabbtn" href="' + attr(n.href) + '" style="text-decoration:none">' +
+        n.icon + '<span>' + esc(n.label) + '</span></a>';
+    }
     return '<button class="tabbtn' + (S.view === n.id ? ' on' : '') + '" data-nav="' + attr(n.id) + '">' +
       n.icon + '<span>' + esc(n.label) + '</span>' + badge + '</button>';
   }).join('');
