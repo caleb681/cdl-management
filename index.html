@@ -473,7 +473,7 @@
       <div>
         <span class="eyebrow on-dark">Apply now</span>
         <h2>Let's see if we're a fit</h2>
-        <p class="lead">Tell us about your showroom. We'll review it, build your free growth audit, and if it's a match, send you straight to book your strategy call.</p>
+        <p class="lead">Tell us about your showroom. We'll review it, build your free growth audit, and if it's a match, Caleb will email you to set up your strategy call.</p>
         <div class="apply-why">
           <div class="eitem"><div class="ck">✓</div><div><h4>Free growth audit</h4><p>A clear look at where you're losing customers online, yours to keep either way.</p></div></div>
           <div class="eitem"><div class="ck">✓</div><div><h4>No pressure, no obligation</h4><p>We only take on showrooms we're confident we can grow.</p></div></div>
@@ -542,9 +542,7 @@
           <div class="success" id="success">
             <div class="ok">✓</div>
             <h3>Application received!</h3>
-            <p>Thanks, we're reviewing your showroom now. The last step is booking your strategy call so we can walk you through your growth audit.</p>
-            <a href="#" class="btn dark" id="bookBtn" target="_blank" rel="noopener" hidden>Book Your Strategy Call →</a>
-            <p class="form-fine" id="bookFallback" style="margin-top:16px" hidden>Caleb will email you within 1 business day to set up your call.</p>
+            <p>Thanks, we're reviewing your showroom now. Caleb will email you within 1 business day to set up your strategy call and walk you through your growth audit.</p>
           </div>
         </form>
       </div>
@@ -573,7 +571,7 @@
 </footer>
 
 <script>
-  // Application form -> reveal booking step (in-memory only, no storage)
+  // Application form -> reveal thank-you step (in-memory only, no storage)
   var form = document.getElementById('applyForm');
   var fields = document.getElementById('formFields');
   var success = document.getElementById('success');
@@ -610,21 +608,6 @@
       body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); }).then(reveal).catch(reveal);
   });
-  // Calendly link for Caleb's 30-minute Growth Audit call. Leave empty to hide the button.
-  var BOOKING_URL = '';
-  (function(){
-    var btn = document.getElementById('bookBtn'), fallback = document.getElementById('bookFallback');
-    if(!BOOKING_URL){ fallback.hidden = false; return; }
-    btn.hidden = false;
-    btn.addEventListener('click', function(){
-      var q = new URLSearchParams({
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        a1: document.getElementById('showroom').value
-      });
-      btn.href = BOOKING_URL + (BOOKING_URL.indexOf('?') > -1 ? '&' : '?') + q.toString();
-    });
-  })();
 </script>
 </body>
 </html>
