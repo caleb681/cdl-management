@@ -93,6 +93,7 @@
   .rank-row.win .rank-badge{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a0d02}
   .rank-name{font-weight:700;font-size:15px}
   .rank-sub{font-size:12px;color:var(--mute)}
+  .example-tag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.12);font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;vertical-align:middle}
   .rank-row.win .rank-sub{color:#ffd9bf}
   .rank-tag{margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-2)}
 
@@ -264,7 +265,7 @@
     </div>
 
     <div class="gcard" aria-hidden="true">
-      <h4>"Flooring store near me" in your city</h4>
+      <h4>"Flooring store near me" in your city <span class="example-tag">Example</span></h4>
       <div class="rank-row win">
         <span class="rank-badge">1</span>
         <div><div class="rank-name">Your Showroom</div><div class="rank-sub">4.9 ★ · 214 reviews · Open now</div></div>
@@ -472,7 +473,7 @@
       <div>
         <span class="eyebrow on-dark">Apply now</span>
         <h2>Let's see if we're a fit</h2>
-        <p class="lead">Tell us about your showroom. We'll review it, build your free growth audit, and if it's a match, send you straight to book your strategy call.</p>
+        <p class="lead">Tell us about your showroom. We'll review it, build your free growth audit, and if it's a match, Caleb will email you to set up your strategy call.</p>
         <div class="apply-why">
           <div class="eitem"><div class="ck">✓</div><div><h4>Free growth audit</h4><p>A clear look at where you're losing customers online, yours to keep either way.</p></div></div>
           <div class="eitem"><div class="ck">✓</div><div><h4>No pressure, no obligation</h4><p>We only take on showrooms we're confident we can grow.</p></div></div>
@@ -541,9 +542,7 @@
           <div class="success" id="success">
             <div class="ok">✓</div>
             <h3>Application received!</h3>
-            <p>Thanks, we're reviewing your showroom now. The last step is booking your strategy call so we can walk you through your growth audit.</p>
-            <a href="#" class="btn dark" id="bookBtn">Book Your Strategy Call →</a>
-            <p class="form-fine" style="margin-top:16px">Connect your Calendly / GHL booking link here.</p>
+            <p>Thanks, we're reviewing your showroom now. Caleb will email you within 1 business day to set up your strategy call and walk you through your growth audit.</p>
           </div>
         </form>
       </div>
@@ -572,7 +571,7 @@
 </footer>
 
 <script>
-  // Application form -> reveal booking step (in-memory only, no storage)
+  // Application form -> reveal thank-you step (in-memory only, no storage)
   var form = document.getElementById('applyForm');
   var fields = document.getElementById('formFields');
   var success = document.getElementById('success');
@@ -608,10 +607,6 @@
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); }).then(reveal).catch(reveal);
-  });
-  document.getElementById('bookBtn').addEventListener('click', function(e){
-    e.preventDefault();
-    alert('Booking link goes here. Connect your Calendly or GHL calendar.');
   });
 </script>
 </body>
