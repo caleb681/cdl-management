@@ -251,6 +251,7 @@
   .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
+<script src="/assets/track.js"></script>
 </head>
 <body>
 
@@ -506,6 +507,7 @@
         var msg = (r.data && r.data.error) ? r.data.error : 'Something went wrong on our end. Please try again in a moment.';
         throw new Error(msg);
       }
+      if (window.cdlTrackLead) window.cdlTrackLead('Free mockup request');
       renderSuccess();
     }).catch(function (err) {
       btn.disabled = false;
