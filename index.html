@@ -261,6 +261,7 @@
   .foot-links a:hover{color:#fff}
   .foot-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px}
 </style>
+<script src="/assets/track.js"></script>
 </head>
 <body>
 
@@ -669,7 +670,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
-    }).then(function(r){ return r.json(); }).then(reveal).catch(reveal);
+    }).then(function(r){ return r.json(); }).then(function(){ if (window.cdlTrackLead) window.cdlTrackLead('Growth audit application'); reveal(); }).catch(reveal);
   });
 </script>
 </body>
