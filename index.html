@@ -215,6 +215,17 @@
   .step p{color:#51607a;font-size:15px}
   @media(max-width:860px){.steps-grid{grid-template-columns:1fr}}
 
+  /* BLOG STRIP */
+  .blog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  .bcard{display:flex;flex-direction:column;border:1px solid #e7ecf4;border-radius:18px;padding:28px;background:#fff;transition:border-color .2s,transform .2s}
+  .bcard:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .bcard h3{font-size:20px;line-height:1.25;font-weight:850;margin-bottom:8px}
+  .bcard p{color:#51607a;font-size:15.5px;margin-bottom:16px}
+  .bcard .more{margin-top:auto;font-weight:800;font-size:14.5px;color:var(--accent)}
+  .blog-all{text-align:center;margin-top:28px;font-weight:800}
+  .blog-all a{color:var(--accent)}
+  @media(max-width:860px){.blog-grid{grid-template-columns:1fr}}
+
   /* FAQ */
   .faq{background:var(--paper-2)}
   .faq-list{max-width:800px;margin:0 auto;display:grid;gap:12px}
@@ -525,6 +536,40 @@
       <details><summary>What if I already have a website? <span class="pm">+</span></summary><p>Great. We'll optimize what you have or rebuild it as part of setup, whichever gets you customers faster. Either way it's covered in the one-time setup fee.</p></details>
       <details><summary>How soon will I see results? <span class="pm">+</span></summary><p>Paid ads and CRM follow-up can start producing leads within the first couple of weeks. SEO and GEO compound over the following months, which is exactly why the guarantee spans a full 90 days.</p></details>
     </div>
+  </div>
+</section>
+
+<!-- FROM THE BLOG -->
+<section class="blog-strip" id="blog">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">From the blog</span>
+      <h2>Guides from the stores we run</h2>
+      <p class="lead">Plain-language write-ups of what we do in our own showrooms, so you can try it in yours.</p>
+    </div>
+    <div class="blog-grid">
+      <a class="bcard" href="/blog/marketing-for-flooring-stores/">
+        <h3>Marketing for flooring stores: what actually brings in showroom visits</h3>
+        <p>What actually brings flooring customers into a showroom, in the order we work on it.</p>
+        <span class="more">Read the guide →</span>
+      </a>
+      <a class="bcard" href="/blog/local-seo-for-flooring-stores/">
+        <h3>Local SEO for flooring stores: a checklist from people who run three showrooms</h3>
+        <p>The local SEO checklist we use on our three Carpet One showrooms.</p>
+        <span class="more">Read the guide →</span>
+      </a>
+      <a class="bcard" href="/blog/google-business-profile-for-flooring-stores/">
+        <h3>Google Business Profile for flooring stores: the setup we use</h3>
+        <p>How we set up and run the Business Profiles for our own stores.</p>
+        <span class="more">Read the guide →</span>
+      </a>
+      <a class="bcard" href="/blog/flooring-store-chatgpt-ai-search/">
+        <h3>How flooring stores can show up in ChatGPT and AI search</h3>
+        <p>The monthly AI search check we run, and what to fix first.</p>
+        <span class="more">Read the guide →</span>
+      </a>
+    </div>
+    <p class="blog-all"><a href="/blog/">See all guides →</a></p>
   </div>
 </section>
 
