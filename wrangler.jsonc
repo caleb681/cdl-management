@@ -1,0 +1,8 @@
+{
+  // Static site served from the repo root. Files listed in .assetsignore are not published.
+  "name": "cdl-management",
+  "compatibility_date": "2026-10-23",
+  "assets": {
+    "directory": "."
+  }
+}

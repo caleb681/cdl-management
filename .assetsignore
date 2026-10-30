@@ -2,3 +2,4 @@ _templates
 README.md
 functions
 .git
+wrangler.jsonc
