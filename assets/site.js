@@ -23,12 +23,16 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   const status = form.querySelector('[role=status]');
   const button = form.querySelector('[type=submit]');
   let busy = false, complete = false, uncertain = false;
+  const requiredInputs = [...form.querySelectorAll('input[required]')];
+  for (const input of requiredInputs) input.addEventListener('input', () => input.setCustomValidity(''));
   // The HTML button starts disabled, so a missing script cannot submit details in a URL.
   button.disabled = false;
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    if (busy || complete || uncertain || !form.reportValidity()) return;
-    const values = Object.fromEntries(new FormData(form));
+    if (busy || complete || uncertain) return;
+    for (const input of requiredInputs) input.setCustomValidity(input.value.trim() ? '' : 'Please enter a value.');
+    if (!form.reportValidity()) return;
+    const values = Object.fromEntries([...new FormData(form)].map(([name, value]) => [name, String(value).trim()]));
     if (values.company_website_hp) return;
     busy = true; button.disabled = true; button.textContent = 'Sending…';
     form.setAttribute('aria-busy', 'true'); status.textContent = '';

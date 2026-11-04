@@ -2,6 +2,7 @@ import {test, before, after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const AxeBuilder=require(process.env.AXE_MODULE||'@axe-core/playwright').default;
@@ -49,9 +50,9 @@ test('all 16 routes render at desktop and mobile without overflow, missing conte
 test('audit acknowledgement hides form and tracks only once; double submit sends once',async()=>{
  const p=await page();let count=0,payload;
  await p.route('https://formsubmit.co/**',async r=>{count++;payload=r.request().postDataJSON();await new Promise(r=>setTimeout(r,200));await r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:'true'})});});
- await p.goto(base+'/contact/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=(window.qaTracked||0)+1);await fill(p);
+ await p.goto(base+'/contact/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=(window.qaTracked||0)+1);await fill(p);await p.locator('#name').fill('  Synthetic QA  ');
  await p.locator('[type=submit]').click();await p.locator('form').evaluate(f=>f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
- await p.getByText('Your application was accepted.',{exact:false}).waitFor();assert.equal(count,1);assert.equal(payload.monthly_revenue,'Under $50k / mo');assert.equal(payload.showroom,'Synthetic QA Showroom');assert.equal(await p.evaluate(()=>window.qaTracked),1);
+ await p.getByText('Your application was accepted.',{exact:false}).waitFor();assert.equal(count,1);assert.equal(payload.name,'Synthetic QA');assert.equal(payload.monthly_revenue,'Under $50k / mo');assert.equal(payload.showroom,'Synthetic QA Showroom');assert.equal(await p.evaluate(()=>window.qaTracked),1);
  assert.equal(await p.locator('.form-fields').isVisible(),false);await p.context().close();
 });
 test('explicit rejection keeps values, allows correction and does not track',async()=>{
@@ -67,7 +68,7 @@ for(const mode of ['network','server','invalid-json','unacknowledged'])test(`unc
  assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');assert.equal(await p.locator('[type=submit]').isEnabled(),false);await p.locator('form').evaluate(f=>f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));assert.equal(count,1);await p.context().close();
 });
 test('invalid required fields cannot send and honeypot cannot send',async()=>{
- const p=await page();let count=0;await p.route('https://formsubmit.co/**',r=>{count++;return r.abort();});await p.goto(base+'/contact/');await p.locator('[type=submit]').click();assert.equal(count,0);await fill(p);await p.locator('#company_website_hp').evaluate(el=>el.value='bot');await p.locator('[type=submit]').click();assert.equal(count,0);await p.context().close();
+ const p=await page();let count=0;await p.route('https://formsubmit.co/**',r=>{count++;return r.abort();});await p.goto(base+'/contact/');await p.locator('[type=submit]').click();assert.equal(count,0);await fill(p);await p.locator('#name').fill('   ');await p.locator('[type=submit]').click();assert.equal(count,0);assert.equal(await p.locator('#name').evaluate(el=>el.validity.customError),true);await p.locator('#name').fill('Synthetic QA');assert.equal(await p.locator('#name').evaluate(el=>el.validity.customError),false);await p.locator('#company_website_hp').evaluate(el=>el.value='bot');await p.locator('[type=submit]').click();assert.equal(count,0);await p.context().close();
 });
 test('a request timeout is held as an uncertain delivery without an automatic retry',async()=>{
  const p=await page();let count=0;
@@ -94,4 +95,12 @@ test('local preview blocks real external form delivery; missing pages return404'
  const response=await p.goto(base+'/contact/');assert.match(response.headers()['content-security-policy'],/connect-src 'self'/);
  await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'could not confirm'}).waitFor();assert.equal(reached,0);
  const missing=await p.goto(base+'/this-page-does-not-exist/');assert.equal(missing.status(),404);assert.match(missing.headers()['x-robots-tag'],/noindex/);assert.match(await p.locator('h1').innerText(),/back/);await p.context().close();
+});
+test('malformed encoded addresses return400 and the isolated preview remains available',async()=>{
+ const child=spawn(process.execPath,[new URL('../tools/preview.mjs',import.meta.url).pathname],{env:{...process.env,PORT:'0'},stdio:['ignore','pipe','pipe']});
+ try{
+  const url=await new Promise((resolve,reject)=>{let text='';const timeout=setTimeout(()=>reject(Error('Preview startup timed out')),5000);child.stdout.on('data',data=>{text+=data;const match=text.match(/http:\/\/127\.0\.0\.1:\d+/);if(match){clearTimeout(timeout);resolve(match[0]);}});child.on('error',reject);child.on('exit',code=>reject(Error('Preview exited '+code)));});
+  const bad=await fetch(url+'/%E0%A4%A');assert.equal(bad.status,400);assert.equal(await bad.text(),'Invalid address');
+  const valid=await fetch(url+'/');assert.equal(valid.status,200);assert.match(await valid.text(),/Marketing built for/);
+ }finally{child.kill('SIGTERM');}
 });
