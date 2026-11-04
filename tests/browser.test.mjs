@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const AxeBuilder=require(process.env.AXE_MODULE||'@axe-core/playwright').default;
@@ -97,7 +98,7 @@ test('local preview blocks real external form delivery; missing pages return404'
  const missing=await p.goto(base+'/this-page-does-not-exist/');assert.equal(missing.status(),404);assert.match(missing.headers()['x-robots-tag'],/noindex/);assert.match(await p.locator('h1').innerText(),/back/);await p.context().close();
 });
 test('malformed encoded addresses return400 and the isolated preview remains available',async()=>{
- const child=spawn(process.execPath,[new URL('../tools/preview.mjs',import.meta.url).pathname],{env:{...process.env,PORT:'0'},stdio:['ignore','pipe','pipe']});
+ const child=spawn(process.execPath,[fileURLToPath(new URL('../tools/preview.mjs',import.meta.url))],{env:{...process.env,PORT:'0'},stdio:['ignore','pipe','pipe']});
  try{
   const url=await new Promise((resolve,reject)=>{let text='';const timeout=setTimeout(()=>reject(Error('Preview startup timed out')),5000);child.stdout.on('data',data=>{text+=data;const match=text.match(/http:\/\/127\.0\.0\.1:\d+/);if(match){clearTimeout(timeout);resolve(match[0]);}});child.on('error',reject);child.on('exit',code=>reject(Error('Preview exited '+code)));});
   const bad=await fetch(url+'/%E0%A4%A');assert.equal(bad.status,400);assert.equal(await bad.text(),'Invalid address');
