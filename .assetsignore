@@ -3,3 +3,11 @@ README.md
 functions
 .git
 wrangler.jsonc
+source
+tools
+tests
+package.json
+package-lock.json
+node_modules
+.wrangler
+.gitignore
