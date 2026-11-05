@@ -53,6 +53,23 @@ test('all public routes render at desktop and mobile without overflow, missing c
  }
  assert.deepEqual(errors,[]);await writeFile(evidence+'/layouts-accessibility.json',JSON.stringify(report,null,2));await p.context().close();
 });
+test('privacy choices remain readable and usable at narrow widths without changing entered form details',async()=>{
+ const p=await page();
+ for(const width of [1440,390,320]){
+  await p.setViewportSize({width,height:900});await p.goto(base+'/contact/');await fill(p);
+  await p.locator('#privacy-choices summary').click();
+  await p.locator('[data-privacy-choice="decline"]').click();
+  assert.match(await p.locator('[data-privacy-status]').innerText(),/off/);
+  assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');
+  assert.equal(await p.locator('[type=submit]').isEnabled(),true);
+  for(const b of await p.locator('.privacy-choice:visible').all()){
+   const box=await b.boundingBox();assert.ok(box.width>=44&&box.height>=44);assert.ok(box.x>=0&&box.x+box.width<=width);
+  }
+  const a=await new AxeBuilder({page:p}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+  assert.deepEqual(a.violations.map(x=>x.id),[]);
+ }
+ await p.context().close();
+});
 test('audit acknowledgement hides form and tracks only once; double submit sends once',async()=>{
  const p=await page();let count=0,payload;
  await p.route('https://formsubmit.co/**',async r=>{count++;payload=r.request().postDataJSON();await new Promise(r=>setTimeout(r,200));await r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:'true'})});});
@@ -67,7 +84,7 @@ test('audit can be acknowledged without optional phone, revenue, goal or website
  await p.goto(base+'/contact/');
  await p.locator('#name').fill('Synthetic QA');await p.locator('#showroom').fill('Synthetic QA Showroom');
  await p.locator('#city').fill('Test City, MO');await p.locator('#email').fill('qa@example.invalid');
- await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();
+ await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'application was accepted'}).waitFor();
  assert.equal(count,1);for(const key of ['phone','monthly_revenue','biggest_goal','website'])assert.equal(payload[key],'');
  await p.context().close();
 });
@@ -80,16 +97,16 @@ test('transition inquiries preserve the selected service path without granting a
   assert.match(await p.locator('#switching').innerText(),/does not (activate|approve)/i);
   await fill(p);await p.locator('#goal').selectOption({label:goal});
   await p.locator('[type=submit]').click();
-  await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();
+  await p.locator('form').getByRole('status').filter({hasText:'application was accepted'}).waitFor();
   assert.equal(count,1);assert.equal(payload.biggest_goal,goal);
-  assert.doesNotMatch(await p.getByRole('status').innerText(),/(credit|offer|eligibility).{0,12}(approved|activated|granted)/i);
+  assert.doesNotMatch(await p.locator('form').getByRole('status').innerText(),/(credit|offer|eligibility).{0,12}(approved|activated|granted)/i);
   await p.context().close();
  }
 });
 test('explicit rejection keeps values, allows correction and does not track',async()=>{
  const p=await page();let count=0;
  await p.route('https://formsubmit.co/**',r=>{count++;return r.fulfill({status:422,contentType:'application/json',body:'{"success":false}'});});
- await p.goto(base+'/contact/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
+ await p.goto(base+'/contact/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p);await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
  assert.equal(await p.locator('#name').inputValue(),'Synthetic QA');assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.evaluate(()=>window.qaTracked),undefined);assert.equal(count,1);await p.context().close();
 });
 test('non-JSON rejection allows a corrected retry and tracks only the acknowledged request',async()=>{
@@ -99,16 +116,16 @@ test('non-JSON rejection allows a corrected retry and tracks only the acknowledg
    count++;return count===1?r.fulfill({status:422,contentType:'text/html',body:'<html>Check the request</html>'}):r.fulfill({status:200,contentType:'application/json',body:kind==='audit'?'{"success":true}':'{"ok":true}'});
   });
   await p.goto(base+(kind==='audit'?'/contact/':'/free-mockup/'));await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=(window.qaTracked||0)+1);await fill(p,kind);
-  await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
+  await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
   assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.evaluate(()=>window.qaTracked||0),0);
-  await p.locator('#name').fill('Corrected Synthetic QA');await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'was accepted'}).waitFor();
+  await p.locator('#name').fill('Corrected Synthetic QA');await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'was accepted'}).waitFor();
   assert.equal(count,2);assert.equal(await p.evaluate(()=>window.qaTracked),1);assert.equal(await p.locator('.form-fields').isVisible(),false);await p.context().close();
  }
 });
 for(const mode of ['network','server','invalid-json','unacknowledged'])test(`unconfirmed ${mode} outcome retains details and blocks automatic retry`,async()=>{
  const p=await page();let count=0;
  await p.route('https://formsubmit.co/**',r=>{count++;if(mode==='network')return r.abort();return r.fulfill({status:mode==='server'?500:200,contentType:mode==='invalid-json'?'text/html':'application/json',body:mode==='invalid-json'?'<html>Error</html>':'{"success":false}'});});
- await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'could not confirm'}).waitFor();
+ await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'could not confirm'}).waitFor();
  assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');assert.equal(await p.locator('[type=submit]').isEnabled(),false);await p.locator('form').evaluate(f=>f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));assert.equal(count,1);await p.context().close();
 });
 test('invalid required fields cannot send and honeypot cannot send',async()=>{
@@ -118,10 +135,40 @@ test('a request timeout is held as an uncertain delivery without an automatic re
  const p=await page();let count=0;
  await p.addInitScript(()=>{const original=window.setTimeout;window.setTimeout=(fn,ms,...args)=>original(fn,ms===18000?40:ms,...args);});
  await p.route('https://formsubmit.co/**',async r=>{count++;await new Promise(r=>setTimeout(r,150));await r.abort();});
- await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'could not confirm'}).waitFor();assert.equal(count,1);assert.equal(await p.locator('[type=submit]').isEnabled(),false);assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');await p.context().close();
+ await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'could not confirm'}).waitFor();assert.equal(count,1);assert.equal(await p.locator('[type=submit]').isEnabled(),false);assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');await p.context().close();
 });
 test('mockup request retains current endpoint and sends correct contact field; explicit receipt required',async()=>{
- const p=await page();let payload,count=0;await p.route('**/api/intake',r=>{count++;payload=r.request().postDataJSON();return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});await p.goto(base+'/free-mockup/');await fill(p,'mockup');await p.locator('#website').fill('example.invalid');await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'design request was accepted'}).waitFor();assert.equal(count,1);assert.equal(payload.name,'Synthetic QA');assert.equal(payload.contact_name,'Synthetic QA');assert.equal(payload.website,'https://example.invalid');assert.equal(payload.source,'free-mockup');await p.context().close();
+ const p=await page();let payload,count=0;await p.route('**/api/intake',r=>{count++;payload=r.request().postDataJSON();return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});await p.goto(base+'/free-mockup/');await fill(p,'mockup');await p.locator('#website').fill('example.invalid');await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'design request was accepted'}).waitFor();assert.equal(count,1);assert.equal(payload.name,'Synthetic QA');assert.equal(payload.contact_name,'Synthetic QA');assert.equal(payload.website,'https://example.invalid');assert.equal(payload.source,'free-mockup');await p.context().close();
+});
+test('an acknowledged duplicate design request is clear and does not count another conversion',async()=>{
+ const p=await page();let count=0;
+ await p.route('**/api/intake',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true,"duplicate":true}'});});
+ await p.goto(base+'/free-mockup/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p,'mockup');
+ await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'already received'}).waitFor();
+ assert.equal(count,1);assert.equal(await p.evaluate(()=>window.qaTracked),undefined);
+ assert.equal(await p.locator('.form-fields').isVisible(),false);assert.equal(await p.locator('form').getByRole('status').locator('a[href^="mailto:"]').count(),1);
+ await p.context().close();
+});
+test('explicit size and media-type rejection keeps details editable without counting a lead',async()=>{
+ for(const code of [413,415]){
+  const p=await page();await p.route('**/api/intake',r=>r.fulfill({status:code,contentType:'application/json',body:'{"error":"Invalid request"}'}));
+  await p.goto(base+'/free-mockup/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p,'mockup');
+  await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
+  assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');assert.equal(await p.locator('[type=submit]').isEnabled(),true);
+  assert.equal(await p.evaluate(()=>window.qaTracked),undefined);await p.context().close();
+ }
+});
+test('optional website validation rejects unsafe addresses and allows correction',async()=>{
+ const p=await page();let count=0;
+ await p.route('**/api/intake',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});
+ await p.goto(base+'/free-mockup/');await fill(p,'mockup');
+ for(const address of ['ftp://example.invalid','https://name:password@example.invalid','bad address']){
+  await p.locator('#website').fill(address);await p.locator('[type=submit]').click();assert.equal(count,0);
+  assert.equal(await p.locator('#website').evaluate(e=>e.validity.customError),true);
+ }
+ await p.locator('#website').fill('example.invalid');assert.equal(await p.locator('#website').evaluate(e=>e.validity.customError),false);
+ await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'was accepted'}).waitFor();assert.equal(count,1);
+ await p.context().close();
 });
 test('keyboard navigation, mobile Escape focus, FAQ and reduced motion',async()=>{
  const p=await page({viewport:{width:390,height:844},reducedMotion:'reduce'});await p.goto(base+'/');await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.textContent),'Skip to content');await p.keyboard.press('Enter');assert.equal(await p.evaluate(()=>document.activeElement.id),'main');await p.locator('.menu-toggle').click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.keyboard.press('Escape');assert.equal(await p.locator('#mobile-menu').isVisible(),false);assert.equal(await p.locator('.menu-toggle').evaluate(el=>el===document.activeElement),true);
@@ -170,11 +217,11 @@ test('offline hints do not send prematurely or prevent an explicit later attempt
   await p.addInitScript(()=>{window.qaOnline=false;Object.defineProperty(navigator,'onLine',{get:()=>window.qaOnline});});
   await p.route('https://formsubmit.co/**',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:'{"success":true}'});});
   await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();
-  assert.match(await p.getByRole('status').innerText(),/We have not sent/);assert.equal(count,0);
+  assert.match(await p.locator('form').getByRole('status').innerText(),/We have not sent/);assert.equal(count,0);
   assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');
   if(reconnect)await p.evaluate(()=>window.qaOnline=true);
   await p.getByRole('button',{name:'Try sending anyway'}).click();
-  await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();assert.equal(count,1);
+  await p.locator('form').getByRole('status').filter({hasText:'application was accepted'}).waitFor();assert.equal(count,1);
   await p.context().close();
  }
 });
@@ -185,16 +232,16 @@ test('pending requests lock editing, rejected requests restore it and recovery c
   await p.route(kind==='audit'?'https://formsubmit.co/**':'**/api/intake',async r=>{payload=r.request().postDataJSON();await ready;await r.fulfill({status:422,contentType:'text/html',body:'Rejected'});});
   await p.goto(base+(kind==='audit'?'/contact/':'/free-mockup/'));await fill(p,kind);
   await p.locator('[type=submit]').click();assert.equal(await p.locator('#email').isDisabled(),true);
-  assert.match(await p.getByRole('status').innerText(),/Sending your request/);
-  assert.equal(await p.getByRole('status').evaluate(e=>e===document.activeElement),true);
+  assert.match(await p.locator('form').getByRole('status').innerText(),/Sending your request/);
+  assert.equal(await p.locator('form').getByRole('status').evaluate(e=>e===document.activeElement),true);
   assert.equal(await p.locator('.form-fields').getAttribute('aria-busy'),'true');
   assert.equal(await p.locator('form').getAttribute('aria-busy'),null);
   assert.equal(await p.locator('#name').isDisabled(),true);assert.equal(await p.locator('select').first().isDisabled(),true);
-  release();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
+  release();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
   assert.equal(payload.email,'qa@example.invalid');assert.equal(await p.locator('#email').isEnabled(),true);
   assert.equal(await p.locator('[type=submit]').isEnabled(),true);
-  assert.equal(await p.getByRole('status').locator('a[href="tel:+16606653889"]').count(),1);
-  assert.equal(await p.getByRole('status').locator('a[href="mailto:caleb@cdl1.net"]').count(),1);
+  assert.equal(await p.locator('form').getByRole('status').locator('a[href="tel:+16606653889"]').count(),1);
+  assert.equal(await p.locator('form').getByRole('status').locator('a[href="mailto:caleb@cdl1.net"]').count(),1);
   await p.context().close();
  }
 });
@@ -205,7 +252,7 @@ test('local preview blocks real external form delivery; missing pages return404'
  const p=await page({bypassCSP:false});let reached=0;
  await p.route('https://formsubmit.co/**',r=>{reached++;return r.abort();});
  const response=await p.goto(base+'/contact/');assert.match(response.headers()['content-security-policy'],/connect-src 'self'/);
- await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'could not confirm'}).waitFor();assert.equal(reached,0);
+ await fill(p);await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'could not confirm'}).waitFor();assert.equal(reached,0);
  const missing=await p.goto(base+'/this-page-does-not-exist/');assert.equal(missing.status(),404);assert.match(missing.headers()['x-robots-tag'],/noindex/);assert.match(await p.locator('h1').innerText(),/back/);await p.context().close();
 });
 test('malformed encoded addresses return400 and the isolated preview remains available',async()=>{

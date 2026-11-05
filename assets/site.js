@@ -29,13 +29,16 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   const status = form.querySelector('[role=status]');
   const button = form.querySelector('[type=submit]');
   const fields = form.querySelector('.form-fields');
+  const website = form.querySelector('[name=website]');
   let busy = false, complete = false, uncertain = false, offlineWarning = false;
   const requiredInputs = [...form.querySelectorAll('input[required]')];
   for (const input of requiredInputs) input.addEventListener('input', () => input.setCustomValidity(''));
+  website?.addEventListener('input', () => website.setCustomValidity(''));
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (busy || complete || uncertain) return;
     for (const input of requiredInputs) input.setCustomValidity(input.value.trim() ? '' : 'Please enter a value.');
+    if (website) website.setCustomValidity(validWebsite(website.value) ? '' : 'Enter a website address such as yourshowroom.com, or leave this optional field blank.');
     if (!form.reportValidity()) return;
     const values = Object.fromEntries([...new FormData(form)].map(([name, value]) => [name, String(value).trim()]));
     if (values.company_website_hp) return;
@@ -74,17 +77,18 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
       if (!response.ok) {
         // Explicit rejection is recoverable even when a provider returns an HTML error page.
         // A server/network failure may have saved the request, so it remains uncertain.
-        if ([400,401,403,404,405,422,429].includes(response.status)) throw new Error('rejected');
+        if ([400,401,403,404,405,413,415,422,429].includes(response.status)) throw new Error('rejected');
         throw new Error('uncertain');
       }
       let result; try { result = await response.json(); } catch { throw new Error('uncertain'); }
       const acknowledged = kind === 'audit' ? result?.success === true || result?.success === 'true' : result?.ok === true;
       if (!acknowledged) throw new Error('uncertain');
+      const duplicate = kind === 'mockup' && result.duplicate === true;
       complete = true;
       fields.hidden = true;
       status.classList.add('form-success');
-      showFormStatus(status, kind === 'audit' ? 'Your application was accepted. We’ll review your showroom and contact you about the next step.' : 'Your design request was accepted. We’ll review your business and follow up by email.');
-      try { window.cdlTrackLead?.(kind === 'audit' ? 'Growth Audit' : 'Free Mockup'); } catch {}
+      showFormStatus(status, duplicate ? 'We already received this design request. There is no need to send it again. Contact us below if you need to correct anything.' : kind === 'audit' ? 'Your application was accepted. We’ll review your showroom and contact you about the next step.' : 'Your design request was accepted. We’ll review your business and follow up by email.');
+      if (!duplicate) try { window.cdlTrackLead?.(kind === 'audit' ? 'Growth Audit' : 'Free Mockup'); } catch {}
     } catch(error) {
       uncertain = error.message !== 'rejected';
       showFormStatus(status, uncertain ? 'We could not confirm delivery. Your request may have arrived. Please call or email us before sending again. Your details remain here.' : 'Your request was not accepted. Check your details or try again later, or contact us below. Your details remain here.');
@@ -111,4 +115,14 @@ function normalizeWebsite(value) {
   const text = String(value || '').trim();
   if (!text) return '';
   return /^https?:\/\//i.test(text) ? text : 'https://' + text.replace(/^\/+/, '');
+}
+function validWebsite(value) {
+  const text = String(value || '').trim();
+  if (!text) return true;
+  if (/[\u0000-\u0020\u007f]/.test(text)) return false;
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text) && !/^https?:\/\//i.test(text)) return false;
+  try {
+    const url = new URL(normalizeWebsite(text));
+    return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname) && !url.username && !url.password;
+  } catch { return false; }
 }
