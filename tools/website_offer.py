@@ -12,6 +12,9 @@ CONTENT_PAGES = 8
 UTILITY_PAGES = 2
 EDIT_MINUTES = 45
 REVISION_ROUNDS = 2
+PLAN_LABEL = 'Proposed standalone website plan for review'
+PLAN_NOTICE = ('The website scope, setup, care, support, timing, payment, cancellation and handover terms below are proposed for review. '
+               'They take effect only in an accepted written agreement; a request does not start service or billing.')
 PRICE = f'${MONTHLY:,}/month + ${SETUP:,} one-time setup'
 PRICE_HTML = f'${MONTHLY:,}<small> / month + ${SETUP:,} one-time setup</small>'
 SUMMARY = (f'One showroom. Up to {CONTENT_PAGES} content pages, mobile design, '
@@ -23,12 +26,12 @@ EXIT_SUMMARY = ('Month-to-month after launch. Cancel with 30 days’ notice, wit
 SEPARATE = ('Local SEO campaigns, ongoing AI-search work, advertising management '
             'and licensed product tools are quoted separately. Ad spend is extra. '
             'CRM integration is planned for later and is not included.')
-PRICE_DESCRIPTION = (f'Recommended website plan: {PRICE}. Up to eight pages, hosting, care and '
-                     '45 minutes of monthly edits. Marketing and ad spend are separate.')
+PRICE_DESCRIPTION = (f'Proposed website-only plan: {PRICE}. Marketing services and media are separate. '
+                     'Review scope, care and terms before committing.')
 
 PLAN_FAQ = (
     'What does the website plan include?',
-    f'Our recommended standalone website plan is {PRICE}. {SUMMARY} Setup includes {REVISION_ROUNDS} consolidated revision rounds. '
+    f'Our proposed standalone website plan for review is {PRICE}. {SUMMARY} Setup includes {REVISION_ROUNDS} consolidated revision rounds. '
     f'{EXIT_SUMMARY} {SEPARATE} <a href="/pricing/">See the full scope and terms.</a>'
 )
 
@@ -95,13 +98,15 @@ PLAN_FAQS = [
 ]
 
 
+PLAN_FAQS = [(question, 'Under this proposed website plan: ' + answer) for question, answer in PLAN_FAQS]
+
 def pricing_content():
     """Return the full visible plan scope; expandable details are added by build."""
-    return f'''<div class="callout"><span class="eyebrow">Recommended standalone website plan</span>
+    return f'''<div class="callout"><span class="eyebrow">{PLAN_LABEL}</span>
 <h2>A better website for your flooring showroom.</h2>
 <p class="answer"><strong>{PRICE}</strong></p><p>{SUMMARY}</p>
 <p>{EXIT_SUMMARY}</p><p><a class="btn" href="/contact/">Discuss my website <span aria-hidden="true">→</span></a></p>
-<p>This is the recommended website-only scope for review. Proposed switching credits need separate written approval; their setup-fee treatment is still open. <a href="/switch/">Review the two proposed transition paths.</a></p>
+<p>{PLAN_NOTICE}</p><p>This is a website-only proposal. Proposed switching credits need separate written approval; their setup-fee treatment is still open. <a href="/switch/">Review the two proposed transition paths.</a></p>
 <p><a href="#included">See exactly what is included ↓</a></p></div>
 <nav class="toc" aria-label="On this page"><b>Know the full scope</b><a href="#included">The build</a><a href="#care">Monthly care</a><a href="#separate">Separate costs</a><a href="#terms">Payments &amp; leaving</a></nav>
 <section id="included"><h2>What setup includes</h2>
@@ -124,4 +129,4 @@ def pricing_content():
 <p>Also separate: manufacturer catalogs/feeds, room visualizers, sample ordering, ecommerce, payments, estimators, appointment engines, call tracking, SMS, email campaigns, customer portals, a self-service CMS, additional locations/languages, extensive content migration, photography and full redesigns.</p>
 <p>You pay domain registration/renewal and business email directly. Any licensed tool is identified with its cost, owner and cancellation/export limits before you commit. No required tool is added silently after signing, and manufacturer or co-op access is not presumed transferable.</p>
 <p>Additional work is <strong>${EXTRA_HOURLY}/hour or a written fixed quote</strong>. You approve the task and maximum charge before we begin. No automatic overage charges.</p></section>
-<section id="terms"><h2>Payments, timing and a clean handover</h2><p>The plan below explains how setup, care and cancellation work. Your written agreement records the exact pages, client responsibilities, milestones and approved extras.</p></section>'''
+<section id="terms"><h2>Payments, timing and a clean handover</h2><p>{PLAN_NOTICE}</p><p>The proposed plan below explains setup, care and cancellation. Your written agreement records the exact pages, client responsibilities, milestones and approved extras.</p></section>'''

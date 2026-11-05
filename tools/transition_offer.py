@@ -54,7 +54,7 @@ OPEN_TERMS = [
      'When credits begin, when the website and marketing start, and how those '
      'dates relate to the existing contract end date.'),
     ('Setup fee',
-     'Whether setup is payable, reduced or credited. The recommended standalone '
+     'Whether setup is payable, reduced or credited. The proposed standalone '
      'website plan’s setup fee is not automatically waived by either proposal.'),
     ('Credit cap and application',
      'The maximum total credit and the CDL website-service invoices it can cover. '
@@ -82,7 +82,9 @@ def marketing_scope_note():
             f'<h2>{MARKETING_HEADLINE}.</h2><p>{MARKETING_SUMMARY}</p>'
             '<p>SEO and advertising-management fees are quoted for your scope. '
             'Advertising spend is separate and paid to the platforms. '
-            'CRM integration is planned for later.</p></div>')
+            'CRM integration is planned for later.</p>'
+            '<p>A new CDL website is not required. We first check whether your existing site and access support the agreed work. '
+            '<a href="/services/">Choose the services you need.</a></p></div>')
 
 
 def transition_cards(contact=False):
@@ -164,7 +166,7 @@ def switch_page_body():
             '<h2>What we must agree before offering a credit.</h2>'
             f'<p><strong>{CREDIT_NOTICE}</strong> {APPROVAL_NOTICE}</p>'
             f'<ul>{terms}</ul><p>{PROVIDER_NOTICE}</p>'
-            '<p>Our <a href="/pricing/">recommended standalone website plan</a> '
+            '<p>Our <a href="/pricing/">proposed standalone website plan</a> '
             'remains a separate proposal. Transition credits do not silently '
             'replace its setup, payment, scope or handover terms. No ranking, '
             'AI recommendation, lead count or sales result is promised.</p>'
