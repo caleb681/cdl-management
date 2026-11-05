@@ -6,7 +6,7 @@ Eligibility, fees, limits and written approval remain necessary before use.
 
 MARKETING_HEADLINE = 'No long-term marketing contract'
 MARKETING_SUMMARY = ('Month-to-month SEO and advertising for independent flooring '
-                     'showrooms. We agree the work, fees and cancellation notice '
+                     'showrooms across the United States. We agree the work, fees and cancellation notice '
                      'in writing before starting.')
 CREDIT_NOTICE = ('Proposed monthly website-service credits; setup and marketing/ad spend '
                  'quoted separately.')
@@ -22,7 +22,7 @@ PROVIDER_NOTICE = ('Credits apply to monthly CDL website-service fees only. They
 TRANSITION_PATHS = [
     {
         'title': 'SEO + advertising with CDL',
-        'headline': 'No monthly website-service fee until your current website contract ends.',
+        'headline': 'No monthly CDL website fee during your approved credit period.',
         'detail': ('When you purchase both paid CDL SEO and advertising management, '
                    'we propose monthly website-service credits through the end of your '
                    'reviewed existing website contract. The maximum free period, '
@@ -112,7 +112,8 @@ def transition_preview(contact=False):
 def switching_contact_note():
     return (f'<section class="callout" id="switching"><h3>Thinking about switching providers?</h3>'
             '<p>Use this inquiry form to start a conversation. Tell us your current '
-            'provider and expected contract end date when we follow up. No contract '
+            'provider and expected contract end date when we follow up. Choose the '
+            'matching switching option under Biggest goal. No contract '
             'upload is needed here; do not send passwords or account credentials.</p>'
             f'<p><strong>{CREDIT_NOTICE}</strong> {REQUEST_NOTICE}</p>'
             '<p>Sending a request does not cancel an agreement or authorize a transfer. '
