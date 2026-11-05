@@ -16,6 +16,8 @@
 body{overflow-wrap:anywhere}.brand{white-space:normal}.hero :focus-visible,.dark-section :focus-visible,.site-footer :focus-visible{outline-color:#fff9ef}
 @media(max-width:820px){.mobile-disclosure{display:block}.header-inner{padding-block:18px;padding-right:calc(24px + 7em)}.menu-toggle{position:absolute;top:18px;right:24px}.header-inner .brand{min-width:0}}
 @media(max-width:600px){.header-inner{padding-right:calc(20px + 7em)}.menu-toggle{right:20px}}
+/* Keep the narrow wordmark intact while reserving room for the Menu control. */
+@media(max-width:360px){.header-inner{padding-right:calc(20px + 6em)}.header-inner .brand{font-size:26px}}
 /* Optional advertising choices do not block navigation or inquiry forms. */
 .privacy-choices{border-top:1px solid #ffffff26;padding-block:18px;margin-bottom:12px}.privacy-choices summary{font-size:16px;min-height:44px;padding-block:10px}.privacy-choices p{max-width:760px;margin:10px 0 16px;color:#e1dbcf}.privacy-actions{display:flex;flex-wrap:wrap;gap:12px}.privacy-choice{padding:11px 16px;min-height:44px;border:1px solid #bfb9ab;border-radius:4px;background:transparent;color:#fff9ef;font-size:14px;line-height:1.5}.privacy-choice:hover{background:#ffffff15}.privacy-choice:disabled{opacity:.65;cursor:default}.privacy-choices [hidden]{display:none}
 /* Retailer worksheet: native controls, no overlay or account requirement. */

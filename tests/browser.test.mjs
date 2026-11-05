@@ -39,8 +39,12 @@ test('all public routes render at desktop and mobile without overflow, missing c
    const response=await p.goto(base+route);assert.equal(response.status(),200,route);
    assert.match(response.headers()['x-robots-tag'],/noindex/);
    await p.evaluate(()=>document.fonts.ready);
-   const layout=await p.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main').length,images:[...document.images].filter(x=>!x.complete||!x.naturalWidth).length}));
-   assert.ok(layout.scroll<=layout.width,`${route} ${width} overflow ${layout.scroll}`);assert.equal(layout.h1,1);assert.equal(layout.main,1);assert.equal(layout.images,0);
+   const layout=await p.evaluate(()=>{
+    const brand=document.querySelector('.site-header .brand');
+    const lines=[...brand.childNodes].filter(n=>(n.nodeType===3&&n.textContent.trim())||(n.nodeType===1&&n.tagName==='B')).flatMap(n=>{const range=document.createRange();range.selectNodeContents(n);return [...range.getClientRects()].filter(r=>r.width>0).map(r=>Math.round(r.top));});
+    return {width:innerWidth,scroll:document.documentElement.scrollWidth,h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main').length,images:[...document.images].filter(x=>!x.complete||!x.naturalWidth).length,wordmarkLines:new Set(lines).size};
+   });
+   assert.ok(layout.scroll<=layout.width,`${route} ${width} overflow ${layout.scroll}`);assert.equal(layout.h1,1);assert.equal(layout.main,1);assert.equal(layout.images,0);assert.equal(layout.wordmarkLines,1,`${route} ${width}: header wordmark wraps`);
    const actions=await p.locator('.btn:not(.secondary):not([disabled])').evaluateAll(es=>{
     const luminance=color=>{const c=color.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return .2126*c[0]+.7152*c[1]+.0722*c[2];};
     return es.filter(e=>e.getClientRects().length).map(e=>{const s=getComputedStyle(e),fg=luminance(s.color),bg=luminance(s.backgroundColor);return{text:e.innerText,foreground:s.color,background:s.backgroundColor,contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)};});
