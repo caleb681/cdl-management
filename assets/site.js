@@ -1,6 +1,11 @@
 /* Navigation is optional; all content and links remain in HTML. */
 const toggle = document.querySelector('.menu-toggle');
 const mobile = document.querySelector('.mobile-nav');
+function closeMobileMenu() {
+  if (!mobile) return;
+  mobile.hidden = true;
+  toggle?.setAttribute('aria-expanded', 'false');
+}
 toggle?.addEventListener('click', () => {
   const open = toggle.getAttribute('aria-expanded') !== 'true';
   toggle.setAttribute('aria-expanded', String(open)); mobile.hidden = !open;
@@ -9,10 +14,16 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   const serviceMenu = document.querySelector('.nav-services[open]');
   if (serviceMenu) { serviceMenu.open = false; serviceMenu.querySelector('summary').focus(); }
-  if (mobile && !mobile.hidden) { mobile.hidden = true; toggle.setAttribute('aria-expanded', 'false'); toggle.focus(); }
+  if (mobile && !mobile.hidden) { closeMobileMenu(); toggle.focus(); }
 });
 mobile?.addEventListener('click', e => {
-  if (e.target.closest('a')) { mobile.hidden = true; toggle.setAttribute('aria-expanded', 'false'); }
+  if (e.target.closest('a')) closeMobileMenu();
+});
+window.matchMedia('(min-width: 821px)').addEventListener('change', e => {
+  if (!e.matches) return;
+  const moveFocus = mobile?.contains(document.activeElement);
+  closeMobileMenu();
+  if (moveFocus) document.querySelector('.site-header .brand')?.focus();
 });
 document.addEventListener('click', e => {
   const menu = document.querySelector('.nav-services[open]');
@@ -54,13 +65,14 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
         method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
         body:JSON.stringify(payload),signal:controller.signal
       });
-      let result; try { result = await response.json(); } catch { throw new Error('uncertain'); }
-      const acknowledged = kind === 'audit' ? result.success === true || result.success === 'true' : result.ok === true;
       if (!response.ok) {
-        // Validation/rate limit responses are safe to correct; a server failure may have saved the request.
+        // Explicit rejection is recoverable even when a provider returns an HTML error page.
+        // A server/network failure may have saved the request, so it remains uncertain.
         if ([400,401,403,404,405,422,429].includes(response.status)) throw new Error('rejected');
         throw new Error('uncertain');
       }
+      let result; try { result = await response.json(); } catch { throw new Error('uncertain'); }
+      const acknowledged = kind === 'audit' ? result?.success === true || result?.success === 'true' : result?.ok === true;
       if (!acknowledged) throw new Error('uncertain');
       complete = true;
       form.querySelector('.form-fields').hidden = true;

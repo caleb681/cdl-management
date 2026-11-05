@@ -40,9 +40,14 @@ test('all public routes render at desktop and mobile without overflow, missing c
    await p.evaluate(()=>document.fonts.ready);
    const layout=await p.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main').length,images:[...document.images].filter(x=>!x.complete||!x.naturalWidth).length}));
    assert.ok(layout.scroll<=layout.width,`${route} ${width} overflow ${layout.scroll}`);assert.equal(layout.h1,1);assert.equal(layout.main,1);assert.equal(layout.images,0);
+   const actions=await p.locator('.btn:not(.secondary):not([disabled])').evaluateAll(es=>{
+    const luminance=color=>{const c=color.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+    return es.filter(e=>e.getClientRects().length).map(e=>{const s=getComputedStyle(e),fg=luminance(s.color),bg=luminance(s.backgroundColor);return{text:e.innerText,foreground:s.color,background:s.backgroundColor,contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)};});
+   });
+   for(const action of actions)assert.ok(action.contrast>=4.5,`${route} ${width}: unreadable primary action ${action.text} (${action.contrast.toFixed(2)}:1)`);
    const a=await new AxeBuilder({page:p}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
    const bad=a.violations.filter(x=>['serious','critical'].includes(x.impact));
-   report.push({route,width,layout,violations:a.violations.map(x=>({id:x.id,impact:x.impact,nodes:x.nodes.map(n=>n.target)}))});
+   report.push({route,width,layout,actions,violations:a.violations.map(x=>({id:x.id,impact:x.impact,nodes:x.nodes.map(n=>n.target)})),incomplete:a.incomplete.map(x=>({id:x.id,impact:x.impact,nodes:x.nodes.map(n=>n.target)}))});
    assert.equal(bad.length,0,JSON.stringify({route,width,bad:bad.map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))}));
   }
  }
@@ -72,6 +77,19 @@ test('explicit rejection keeps values, allows correction and does not track',asy
  await p.goto(base+'/contact/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p);await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
  assert.equal(await p.locator('#name').inputValue(),'Synthetic QA');assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.evaluate(()=>window.qaTracked),undefined);assert.equal(count,1);await p.context().close();
 });
+test('non-JSON rejection allows a corrected retry and tracks only the acknowledged request',async()=>{
+ for(const kind of ['audit','mockup']){
+  const p=await page();let count=0;
+  await p.route(kind==='audit'?'https://formsubmit.co/**':'**/api/intake',r=>{
+   count++;return count===1?r.fulfill({status:422,contentType:'text/html',body:'<html>Check the request</html>'}):r.fulfill({status:200,contentType:'application/json',body:kind==='audit'?'{"success":true}':'{"ok":true}'});
+  });
+  await p.goto(base+(kind==='audit'?'/contact/':'/free-mockup/'));await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=(window.qaTracked||0)+1);await fill(p,kind);
+  await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
+  assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.evaluate(()=>window.qaTracked||0),0);
+  await p.locator('#name').fill('Corrected Synthetic QA');await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'was accepted'}).waitFor();
+  assert.equal(count,2);assert.equal(await p.evaluate(()=>window.qaTracked),1);assert.equal(await p.locator('.form-fields').isVisible(),false);await p.context().close();
+ }
+});
 for(const mode of ['network','server','invalid-json','unacknowledged'])test(`unconfirmed ${mode} outcome retains details and blocks automatic retry`,async()=>{
  const p=await page();let count=0;
  await p.route('https://formsubmit.co/**',r=>{count++;if(mode==='network')return r.abort();return r.fulfill({status:mode==='server'?500:200,contentType:mode==='invalid-json'?'text/html':'application/json',body:mode==='invalid-json'?'<html>Error</html>':'{"success":false}'});});
@@ -93,6 +111,14 @@ test('mockup request retains current endpoint and sends correct contact field; e
 test('keyboard navigation, mobile Escape focus, FAQ and reduced motion',async()=>{
  const p=await page({viewport:{width:390,height:844},reducedMotion:'reduce'});await p.goto(base+'/');await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.textContent),'Skip to content');await p.keyboard.press('Enter');assert.equal(await p.evaluate(()=>document.activeElement.id),'main');await p.getByRole('button',{name:'Menu'}).click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.keyboard.press('Escape');assert.equal(await p.locator('#mobile-menu').isVisible(),false);assert.equal(await p.getByRole('button',{name:'Menu'}).evaluate(el=>el===document.activeElement),true);
  await p.locator('.faq-list summary').first().click();assert.equal(await p.locator('.faq-list details').first().getAttribute('open'),'');assert.equal(await p.evaluate(()=>getComputedStyle(document.documentElement).scrollBehavior),'auto');await p.context().close();
+});
+test('open mobile navigation resets when the viewport switches to desktop',async()=>{
+ const p=await page({viewport:{width:390,height:844}});await p.goto(base+'/');
+ await p.getByRole('button',{name:'Menu'}).click();await p.locator('#mobile-menu a').first().focus();
+ await p.setViewportSize({width:1440,height:1000});await p.locator('#mobile-menu').waitFor({state:'hidden'});
+ assert.equal(await p.locator('.menu-toggle').getAttribute('aria-expanded'),'false');assert.equal(await p.locator('.site-header .brand').evaluate(el=>el===document.activeElement),true);
+ await p.setViewportSize({width:390,height:844});assert.equal(await p.locator('#mobile-menu').isVisible(),false);
+ await p.getByRole('button',{name:'Menu'}).click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.context().close();
 });
 test('core services, pricing and articles are available with JavaScript disabled',async()=>{
  const p=await page({javaScriptEnabled:false});for(const route of ['/','/services/local-seo/','/pricing/','/blog/local-seo-for-flooring-stores/']){await p.goto(base+route);assert.ok((await p.locator('main').innerText()).length>800);assert.equal(await p.locator('h1').count(),1);}await p.goto(base+'/contact/');assert.match(await p.locator('noscript').innerText(),/email/);assert.equal(await p.locator('[type=submit]').isDisabled(),true);assert.equal(await p.locator('form').getAttribute('method'),'post');await p.context().close();

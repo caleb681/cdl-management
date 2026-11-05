@@ -1,9 +1,10 @@
 """Buyer guidance page bodies for the local CDL Marketing review build."""
+from website_offer import PRICE, EXIT_SUMMARY
 
 
 def comparison_body() -> str:
     """Return the comparison article; the caller supplies its hero and CTA."""
-    return '''<section class="section"><article class="wrap article-layout" aria-label="CDL Marketing and Broadlume comparison">
+    return f'''<section class="section"><article class="wrap article-layout" aria-label="CDL Marketing and Broadlume comparison">
 <p class="article-meta">Reviewed <time datetime="2026-11-04">November 4, 2026</time> · Published by CDL Marketing</p>
 <p class="answer">Considering a Broadlume alternative? Compare the work your showroom needs, the systems you already use and the terms in each proposal. Broadlume, now a Cyncly company, offers a broad flooring technology platform. CDL brings an operator's perspective to a focused marketing engagement.</p>
 
@@ -22,8 +23,8 @@ def comparison_body() -> str:
 <tbody>
 <tr><th scope="row">What am I buying?</th><td>A scoped marketing service informed by showroom operating experience.</td><td>A flooring website and technology offering with feature tiers and additional services.</td></tr>
 <tr><th scope="row">What happens to my current systems?</th><td>We assess the website and marketing access needed. CRM integration is future work.</td><td>Packages list connected website tools and RLM seats. Confirm compatibility with your specific systems.</td></tr>
-<tr><th scope="row">What will I pay?</th><td>Review <a href="/pricing/">pricing</a> and your written scope. Advertising spend and service fees are separate.</td><td>The reviewed package table has no dollar rates. Request a proposal for the equivalent scope.</td></tr>
-<tr><th scope="row">Who controls the accounts, and how do I leave?</th><td>Confirm access, ownership, cancellation and handover terms in your agreement.</td><td>These contract terms were not established by this public-page review. Ask for the applicable agreement.</td></tr>
+<tr><th scope="row">What will I pay?</th><td>{PRICE} for one showroom, up to eight content pages, hosting/care and 45 minutes of monthly edits. <a href="/pricing/">Review the full plan</a>. Marketing and advertising spend are separate.</td><td>The reviewed package table has no dollar rates. Request a proposal for the equivalent scope.</td></tr>
+<tr><th scope="row">Who controls the accounts, and how do I leave?</th><td>{EXIT_SUMMARY} <a href="/pricing/#terms">Read payment and handover terms</a>.</td><td>These contract terms were not established by this public-page review. Ask for the applicable agreement.</td></tr>
 </tbody></table></div>
 
 <div class="callout"><h3>Compare evidence, too</h3><p>A service list describes an offer. It does not establish your likely results. Ask each provider for relevant examples, measurement definitions and the limits of its evidence. CDL's operating experience is not a verified client-results history.</p></div>
