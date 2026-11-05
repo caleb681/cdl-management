@@ -149,8 +149,8 @@ test('an acknowledged duplicate design request is clear and does not count anoth
  assert.equal(await p.locator('.form-fields').isVisible(),false);assert.equal(await p.locator('form').getByRole('status').locator('a[href^="mailto:"]').count(),1);
  await p.context().close();
 });
-test('explicit size and media-type rejection keeps details editable without counting a lead',async()=>{
- for(const code of [413,415]){
+test('explicit body timeout, size and media-type rejection keeps details editable without counting a lead',async()=>{
+ for(const code of [408,413,415]){
   const p=await page();await p.route('**/api/intake',r=>r.fulfill({status:code,contentType:'application/json',body:'{"error":"Invalid request"}'}));
   await p.goto(base+'/free-mockup/');await p.evaluate(()=>window.cdlTrackLead=()=>window.qaTracked=true);await fill(p,'mockup');
   await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
