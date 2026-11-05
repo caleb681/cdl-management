@@ -42,6 +42,12 @@ The previous bundled fee table and 15-lead guarantee are removed from generated 
 
 Current public services: websites, local SEO, paid advertising and AI search visibility. Buyer pages are composed from the separate `tools/buyer_content.py` module at `/compare/broadlume/` and `/guides/choosing-a-flooring-marketing-agency/`.
 
+## Retailer education
+
+`tools/retailer_resources.py` builds `/guides/flooring-marketing-checklist/` and `/guides/your-first-marketing-review/`. Contact's after-call section, the agency buyer guide and shared footer link to them. The checklist is an educational self-review, not a crawl, performance score or quote. Its six native selections work as reading prompts without JavaScript.
+
+Only the checklist loads `assets/diagnostic.js`. It uses fixed options to create a local discussion list, lists unknowns, hides stale results after edits and supports reset/browser print. It makes no network, storage or analytics calls and does not attach answers to inquiry forms or links. Shared optional advertising choices remain governed by the existing privacy controls. No new account access, automated report, service commitment or pricing is implied. The companion guide explains the first assessment, service fit and conditional transition steps with official-source links.
+
 ## Forms and tracking
 
 Both inquiry forms use the same protected, same-origin intake system. Growth audit requests POST to `/api/intake/audit`; free-design requests POST to `/api/intake`. There is no FormSubmit fallback or dual delivery. Audit name, showroom, city/state and email remain required; phone, website, revenue and goal remain optional. Public payloads cannot change trusted leads or approve an offer. The actual backend remains in the private `cdl-management/api-worker` source; `functions/api/[[path]].js` is an excluded historical stub.

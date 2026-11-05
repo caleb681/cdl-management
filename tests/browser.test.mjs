@@ -398,3 +398,81 @@ test('200 percent modeled text enlargement preserves reflow, Menu and hero conte
   }
  }finally{await p.context().close();}
 });
+
+test('retailer diagnostic produces local discussion points, invalidates stale results and resets accessibly',async()=>{
+ const p=await page({viewport:{width:390,height:844}});const posts=[],external=[];
+ p.on('request',r=>{if(r.method()==='POST')posts.push(r.url());if(new URL(r.url()).origin!==new URL(base).origin)external.push(r.url());});
+ try{
+  await p.goto(base+'/guides/flooring-marketing-checklist/');
+  assert.equal(await p.locator('form').count(),0);
+  assert.equal(await p.locator('[data-check-answer]').count(),6);
+  const storage=await p.evaluate(()=>({local:{...localStorage},session:{...sessionStorage}}));
+  await p.getByRole('button',{name:'Show my discussion points'}).click();
+  assert.equal(await p.locator('#discussion-title').evaluate(e=>e===document.activeElement),true);
+  assert.match(await p.locator('[data-summary-intro]').innerText(),/not marked any item/);
+  assert.match(await p.locator('[data-summary-unknown]').innerText(),/Still to check:/);
+  await p.locator('#answer-inquiry').selectOption('review');
+  assert.equal(await p.locator('[data-diagnostic-summary]').isVisible(),false);
+  await p.locator('#answer-local').selectOption('checked');
+  await p.locator('#answer-advertising').selectOption('na');
+  await p.locator('#answer-access').selectOption('review');
+  await p.getByRole('button',{name:'Show my discussion points'}).click();
+  const links=p.locator('[data-summary-list] a');assert.equal(await links.count(),2);
+  assert.equal(await links.nth(0).getAttribute('href'),'/services/websites/');
+  assert.equal(await links.nth(1).getAttribute('href'),'/guides/your-first-marketing-review/#transition');
+  assert.match(await p.locator('[data-summary-unknown]').innerText(),/Useful pages for search and AI; Measurement and response/);
+  await p.evaluate(()=>{window.__printCalls=0;window.print=()=>{window.__printCalls++;};});
+  await p.getByRole('button',{name:'Print or save with your browser'}).click();
+  assert.equal(await p.evaluate(()=>window.__printCalls),1);
+  assert.deepEqual(await p.evaluate(()=>({local:{...localStorage},session:{...sessionStorage}})),storage);
+  await p.getByRole('button',{name:'Reset choices'}).click();
+  assert.equal(await p.locator('[data-diagnostic-summary]').isVisible(),false);
+  assert.equal(await p.locator('#answer-inquiry').evaluate(e=>e===document.activeElement),true);
+  assert.deepEqual(await p.locator('[data-check-answer]').evaluateAll(es=>es.map(e=>e.value)),Array(6).fill('unknown'));
+  assert.equal(posts.length,0);assert.equal(external.length,0);
+ }finally{await p.context().close();}
+});
+
+test('all checked diagnostic choices do not become a score or verified success claim',async()=>{
+ const p=await page();try{
+  await p.goto(base+'/guides/flooring-marketing-checklist/');
+  for(const choice of await p.locator('[data-check-answer]').all())await choice.selectOption('checked');
+  await p.getByRole('button',{name:'Show my discussion points'}).click();
+  assert.match(await p.locator('[data-summary-intro]').innerText(),/does not establish that your marketing is working/);
+  assert.match(await p.locator('[data-summary-unknown]').innerText(),/Bring the evidence/);
+  assert.equal(await p.locator('[data-summary-list]').isVisible(),false);
+ }finally{await p.context().close();}
+});
+
+async function waitForScrollToSettle(p){
+ // Poll from Node: no-JS pages can stall an automation retry timer during an initial smooth fragment scroll.
+ let previous=null,stable=0;
+ for(let attempt=0;attempt<30;attempt++){
+  const current=await p.evaluate(()=>scrollY);
+  stable=current===previous?stable+1:0;
+  if(stable>=3)return;
+  previous=current;await new Promise(resolve=>setTimeout(resolve,100));
+ }
+ assert.fail('fragment scroll did not settle');
+}
+
+test('post-call educational path works without JavaScript and does not carry private selections',async()=>{
+ const p=await page({javaScriptEnabled:false,viewport:{width:320,height:844}});try{
+  await p.goto(base+'/contact/#after-call');await waitForScrollToSettle(p);
+  await p.locator('#after-call').getByRole('link',{name:'Note your own observations'}).click();
+  await p.waitForURL(base+'/guides/flooring-marketing-checklist/');
+  assert.match(await p.locator('noscript').innerText(),/guidance work without JavaScript/);
+  assert.equal(await p.locator('[data-diagnostic-tools]').isVisible(),false);
+  assert.equal(await p.locator('[data-diagnostic-summary]').isVisible(),false);
+  await p.getByRole('link',{name:'Prepare for my first review'}).click();
+  await p.waitForURL(base+'/guides/your-first-marketing-review/');
+  await p.getByRole('link',{name:'Your current website',exact:true}).click();
+  await p.waitForURL(base+'/guides/your-first-marketing-review/#transition');await waitForScrollToSettle(p);
+  assert.match(await p.locator('#transition').innerText(),/do not need to cancel/);
+  await p.getByRole('link',{name:'Continue our conversation'}).click();
+  await p.waitForURL(base+'/contact/#after-call');
+  assert.equal(new URL(p.url()).search,'');
+  assert.equal(await p.locator('button[type="submit"]').isDisabled(),true);
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ }finally{await p.context().close();}
+});
