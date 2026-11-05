@@ -30,7 +30,7 @@ async function fill(p,kind='audit'){
   await p.locator('#goal').selectOption({label:'More local customers / leads'});
  }else await p.locator('#vertical').selectOption('Flooring');
 }
-test('all 16 routes render at desktop and mobile without overflow, missing content, console errors or serious accessibility violations',async()=>{
+test('all public routes render at desktop and mobile without overflow, missing content, console errors or serious accessibility violations',async()=>{
  const report=[];const p=await page();const errors=[];p.on('pageerror',e=>errors.push(e.message));
  for(const width of [1440,390,320]){
   await p.setViewportSize({width,height:960});
@@ -55,6 +55,16 @@ test('audit acknowledgement hides form and tracks only once; double submit sends
  await p.locator('[type=submit]').click();await p.locator('form').evaluate(f=>f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
  await p.getByText('Your application was accepted.',{exact:false}).waitFor();assert.equal(count,1);assert.equal(payload.name,'Synthetic QA');assert.equal(payload.monthly_revenue,'Under $50k / mo');assert.equal(payload.showroom,'Synthetic QA Showroom');assert.equal(await p.evaluate(()=>window.qaTracked),1);
  assert.equal(await p.locator('.form-fields').isVisible(),false);await p.context().close();
+});
+test('audit can be acknowledged without optional phone, revenue, goal or website',async()=>{
+ const p=await page();let payload,count=0;
+ await p.route('https://formsubmit.co/**',r=>{count++;payload=r.request().postDataJSON();return r.fulfill({status:200,contentType:'application/json',body:'{"success":true}'});});
+ await p.goto(base+'/contact/');
+ await p.locator('#name').fill('Synthetic QA');await p.locator('#showroom').fill('Synthetic QA Showroom');
+ await p.locator('#city').fill('Test City, MO');await p.locator('#email').fill('qa@example.invalid');
+ await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();
+ assert.equal(count,1);for(const key of ['phone','monthly_revenue','biggest_goal','website'])assert.equal(payload[key],'');
+ await p.context().close();
 });
 test('explicit rejection keeps values, allows correction and does not track',async()=>{
  const p=await page();let count=0;

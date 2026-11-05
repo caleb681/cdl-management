@@ -7,3 +7,6 @@
 @media(max-width:600px){.header-inner{gap:12px}.header-inner .brand{font-size:28px}.header-inner .brand small{font-size:8px;letter-spacing:1.2px}.menu-toggle{font-size:14px;padding:10px}.hero h1{font-size:clamp(40px,12.5vw,49px)}}
 .article-layout .tbl{max-width:100%;overflow:auto;border:1px solid var(--line);margin:26px 0}.article-layout .tbl table{border-collapse:collapse;min-width:600px;font-size:14px}.article-layout .tbl td,.article-layout .tbl th{padding:12px;text-align:left;border-bottom:1px solid var(--line)}.article-layout .tbl th{background:#eee6da}.article-layout .answer{font-size:19px;color:var(--ink);border-left:3px solid var(--accent);padding-left:22px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+/* Buyer guidance and the supplied portrait retain the shared responsive design. */
+.quote-panel p.muted{font:17px/1.65 var(--sans);letter-spacing:0}.quote-panel .text-link{margin-block:8px}.scope-note{font-size:15px;line-height:1.65}.article-layout caption{text-align:left;font-weight:650;padding:14px}.article-layout time{white-space:nowrap}

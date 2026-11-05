@@ -18,6 +18,7 @@ class Page(HTMLParser):
   if tag=='link' and a.get('rel')=='canonical':self.canonical.append(a['href'])
   if tag=='a' and 'href' in a:self.refs.append(a['href'])
   if tag in ['img','script'] and a.get('src'):self.refs.append(a['src'])
+  if tag=='img' and a.get('srcset'):self.refs.extend(item.strip().split()[0] for item in a['srcset'].split(',') if item.strip())
   if tag=='link' and a.get('rel') in ['stylesheet','icon']:self.refs.append(a['href'])
   if tag=='img':self.images.append(a)
   if tag=='script' and a.get('type')=='application/ld+json':self.in_json=True;self.buffer=''
