@@ -121,8 +121,8 @@ def switching_contact_note():
 
 def switch_page_body():
     terms = ''.join(f'<li><strong>{title}:</strong> {detail}</li>' for title, detail in OPEN_TERMS)
-    return (f'<section class="section"><div class="wrap">{marketing_scope_note()}'
-            f'{transition_preview(contact=True)}'
+    return (f'<section class="section"><div class="wrap">{transition_preview(contact=True)}'
+            f'{marketing_scope_note()}'
             '</div></section>'
             '<section class="section light" id="review"><div class="wrap article-layout">'
             '<span class="eyebrow">Start with the actual agreement</span>'

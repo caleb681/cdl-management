@@ -216,7 +216,7 @@ def buyer_pages():
  write('/guides/choosing-a-flooring-marketing-agency/','How to Choose a Flooring Marketing Agency | CDL Marketing','A practical checklist for flooring showroom owners comparing marketing agencies: scope, pricing, websites, data, proof and questions to ask.',subhero('Buyer’s guide','Choose an agency<br>with clear answers.','A practical checklist for independent flooring showroom owners.','/guides/choosing-a-flooring-marketing-agency/')+agency_guide_body()+cta())
 
 def switching():
- write('/switch/','Switch Website Providers | Proposed CDL Transition Credits','Review proposed CDL website-service credits when switching from Broadlume or another provider. Eligibility, setup, paid marketing and credit terms need written approval.',subhero('Switching providers','A clearer move.<br>A website that keeps working.','Proposed switching support, with a review of your current agreement before any credit or cutover is approved.','/switch/')+switch_page_body())
+ write('/switch/','Switch Website Providers | Proposed CDL Transition Credits','Review proposed CDL website-service credits when switching from Broadlume or another provider. Eligibility, setup, paid marketing and credit terms need written approval.',subhero('Switching providers','Switch providers<br>with a clear plan.','Month-to-month marketing and proposed monthly website-service credits. Review both paths, then confirm your eligibility and terms in writing.','/switch/')+switch_page_body())
 
 def main():
  home();services();pricing();about();contact();legacy_pages();buyer_pages();switching()
