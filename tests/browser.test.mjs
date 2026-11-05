@@ -469,8 +469,16 @@ test('post-call educational path works without JavaScript and does not carry pri
   await p.getByRole('link',{name:'Your current website',exact:true}).click();
   await p.waitForURL(base+'/guides/your-first-marketing-review/#transition');await waitForScrollToSettle(p);
   assert.match(await p.locator('#transition').innerText(),/do not need to cancel/);
-  await p.getByRole('link',{name:'Continue our conversation'}).click();
-  await p.waitForURL(base+'/contact/#after-call');
+  await p.locator('#transition a[href="/guides/switching-flooring-website-providers/"]').click();
+  await p.waitForURL(base+'/guides/switching-flooring-website-providers/');
+  assert.equal(await p.locator('form,input,select,textarea').count(),0);
+  await p.locator('#agreement summary').focus();await p.keyboard.press('Enter');
+  assert.equal(await p.locator('#agreement details').getAttribute('open'),'');
+  assert.match(await p.locator('#agreement details').innerText(),/Which document establishes each date/);
+  await p.locator('.toc a[href="#cutover"]').click();
+  await p.waitForURL(base+'/guides/switching-flooring-website-providers/#cutover');await waitForScrollToSettle(p);
+  await p.getByRole('link',{name:'Discuss my provider transition'}).click();
+  await p.waitForURL(base+'/contact/#switching');
   assert.equal(new URL(p.url()).search,'');
   assert.equal(await p.locator('button[type="submit"]').isDisabled(),true);
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

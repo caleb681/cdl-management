@@ -6,6 +6,7 @@ import re, json, html, xml.etree.ElementTree as ET
 from datetime import date
 from buyer_content import comparison_body, agency_guide_body
 from privacy_policy import privacy_content
+from switch_readiness import READINESS_PATH, readiness_body
 from retailer_resources import CHECKLIST_PATH, REVIEW_PATH, checklist_body, first_review_body, resource_links
 from website_offer import PLAN_NOTICE, PRICE, PRICE_HTML, SUMMARY, EXIT_SUMMARY, SEPARATE, PRICE_DESCRIPTION, PLAN_FAQ, PLAN_FAQS, pricing_content
 from transition_offer import MARKETING_HEADLINE, MARKETING_SUMMARY, MARKETING_FAQ, REQUEST_NOTICE, marketing_scope_note, transition_preview, switching_contact_note, switch_page_body
@@ -228,6 +229,7 @@ def switching():
  write('/switch/','Switch Website Providers | Proposed CDL Transition Credits','Review proposed CDL website-service credits when switching from Broadlume or another provider. Eligibility, setup, paid marketing and credit terms need written approval.',subhero('Switching providers','Switch providers<br>with a clear plan.','Month-to-month marketing and proposed monthly website-service credits. Review both paths, then confirm your eligibility and terms in writing.','/switch/')+switch_page_body())
 
 def retailer_pages():
+ write(READINESS_PATH,'Flooring Website Switch Checklist | CDL Marketing','Check contract dates, account control, content rights, analytics and inquiry routes before planning a flooring website move, cutover or rollback.',subhero('Switch readiness','Know what can move.<br>Protect what must work.','A practical checklist for changing website providers around your actual agreement, accounts and customer paths.',READINESS_PATH)+readiness_body())
  write(CHECKLIST_PATH,'Flooring Marketing Checklist | CDL Marketing','Check your flooring website, local information and advertising. Organize observations for a useful first review, with no score or contact details required.',subhero('For showroom owners','A practical flooring<br>marketing checklist.','Six checks to help you see what works, what needs attention and what you still need to find out.',CHECKLIST_PATH)+checklist_body(),extra_scripts=('/assets/diagnostic.js',))
  write(REVIEW_PATH,'Your First Flooring Marketing Review | CDL Marketing','Prepare for a flooring marketing review: what to bring, how to assess your current website, and how SEO, advertising and a careful transition fit together.',subhero('Your first review','Start with your showroom.<br>Agree a useful next step.','A guide to the first assessment, the work you might need and a careful transition if you choose to change providers.',REVIEW_PATH)+first_review_body())
 

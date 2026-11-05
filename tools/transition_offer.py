@@ -119,7 +119,8 @@ def switching_contact_note():
             'upload is needed here; do not send passwords or account credentials.</p>'
             f'<p><strong>{CREDIT_NOTICE}</strong> {REQUEST_NOTICE}</p>'
             '<p>Sending a request does not cancel an agreement or authorize a transfer. '
-            '<a href="/switch/">Review both proposed paths first.</a></p></section>')
+            '<a href="/switch/">Review both proposed paths first.</a></p>'
+            '<p><a href="/guides/switching-flooring-website-providers/">Use the switch-readiness checklist</a> to organize agreement, account and inquiry questions before the follow-up.</p></section>')
 
 
 def switch_page_body():
@@ -143,6 +144,10 @@ def switch_page_body():
             '<p>No file upload is required to ask about switching. Start with a '
             '<a href="/contact/#switching">conversation about your current website</a>. '
             'Review is not approval of a credit or a legal interpretation of your agreement.</p>'
+            '<div class="callout"><h3>What is ready, and what needs checking?</h3>'
+            '<p>Separate confirmed records from reported details and unknowns. Use the '
+            '<a href="/guides/switching-flooring-website-providers/">switch-readiness checklist</a> '
+            'for notice dates, domain and account control, content rights, measurement, inquiries and a staged move.</p></div>'
             '</div></section>'
             '<section class="section"><div class="wrap article-layout">'
             '<span class="eyebrow">A controlled handover</span><h2>Four steps to switching.</h2>'

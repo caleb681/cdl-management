@@ -48,6 +48,10 @@ Current public services: websites, local SEO, paid advertising and AI search vis
 
 Only the checklist loads `assets/diagnostic.js`. It uses fixed options to create a local discussion list, lists unknowns, hides stale results after edits and supports reset/browser print. It makes no network, storage or analytics calls and does not attach answers to inquiry forms or links. Shared optional advertising choices remain governed by the existing privacy controls. No new account access, automated report, service commitment or pricing is implied. The companion guide explains the first assessment, service fit and conditional transition steps with official-source links.
 
+### Existing-provider readiness
+
+`tools/switch_readiness.py` builds `/guides/switching-flooring-website-providers/`, linked from the switching page, Contact's switching section and the first-review guide. This static educational checklist separates verified records, reported details, unknowns and conflicting evidence. It covers actual renewal/notice, distinct domain/DNS/email control, account access, content/catalog rights, measurement, inquiry routing and staged cutover/recovery. No file upload, score, date calculator, new script or service activation is added. The detailed caller worksheet/workflow stays in private review material outside this public repository.
+
 ## Forms and tracking
 
 Both inquiry forms use the same protected, same-origin intake system. Growth audit requests POST to `/api/intake/audit`; free-design requests POST to `/api/intake`. There is no FormSubmit fallback or dual delivery. Audit name, showroom, city/state and email remain required; phone, website, revenue and goal remain optional. Public payloads cannot change trusted leads or approve an offer. The actual backend remains in the private `cdl-management/api-worker` source; `functions/api/[[path]].js` is an excluded historical stub.
