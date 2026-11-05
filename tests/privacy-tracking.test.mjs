@@ -16,7 +16,7 @@ after(async()=>{await browser?.close();});
 
 async function fixture(options={}){
  const context=await browser.newContext({javaScriptEnabled:options.javaScriptEnabled!==false});
- const requests=[];let sdkRequests=0,releaseSdk;
+ const requests=[],intakeRequests=[];let sdkRequests=0,releaseSdk;
  const pendingSdk=options.delaySdk?new Promise(resolve=>releaseSdk=resolve):Promise.resolve();
  await context.addInitScript(({key,choice,gpc,dnt,brokenStorage})=>{
   if(choice!==undefined&&!sessionStorage.getItem('qa-privacy-seeded')){
@@ -45,8 +45,18 @@ async function fixture(options={}){
   }
   if(url===origin+'/track.js'||url==='http://127.0.0.1/track.js')return route.fulfill({status:200,contentType:'application/javascript',body:script});
   if(url===origin+'/site.js')return route.fulfill({status:200,contentType:'application/javascript',body:formScript});
-  if(options.realForm&&(url.startsWith('https://formsubmit.co/ajax/')||url===origin+'/api/intake')){
-   const body=options.response==='uncertain'?{}:options.realForm==='audit'?{success:true}:{ok:true,...(options.response==='duplicate'?{duplicate:true}:{})};
+  if(options.realForm&&(url===origin+'/api/intake/audit'||url===origin+'/api/intake')){
+   intakeRequests.push({url,method:route.request().method(),payload:route.request().postDataJSON()});
+   let body={ok:true,status:'received_unverified',request_kind:options.realForm,request_id:'7255f3e8-bb92-4ae2-b28c-11604028f0d1',duplicate:options.response==='duplicate'};
+   if(options.response==='uncertain')body={};
+   if(options.response==='wrong-kind')body.request_kind=options.realForm==='audit'?'mockup':'audit';
+   if(options.response==='missing-kind')delete body.request_kind;
+   if(options.response==='missing-id')delete body.request_id;
+   if(options.response==='invalid-id')body.request_id='not-a-uuid';
+   if(options.response==='wrong-status')body.status='approved';
+   if(options.response==='missing-duplicate')delete body.duplicate;
+   if(options.response==='invalid-duplicate')body.duplicate='false';
+   if(options.response==='legacy')body=options.realForm==='audit'?{success:true}:{ok:true};
    return route.fulfill({status:options.response==='reject'?422:200,contentType:'application/json',body:JSON.stringify(body)});
   }
   if(url==='https://connect.facebook.net/en_US/fbevents.js'){
@@ -59,7 +69,7 @@ async function fixture(options={}){
  await page.goto(options.preview?'http://127.0.0.1/':origin+'/',{waitUntil:'domcontentloaded'});
  if(!options.noControls)await page.locator('#privacy-choices').evaluate(el=>el.open=true);
  const events=()=>page.evaluate(()=>window.qaEvents||[]);
- return {context,page,events,errors,requests,sdkRequests:()=>sdkRequests,releaseSdk:()=>releaseSdk?.()};
+ return {context,page,events,errors,requests,intakeRequests,sdkRequests:()=>sdkRequests,releaseSdk:()=>releaseSdk?.()};
 }
 const saved=choice=>({version:1,choice,savedAt:Date.now()});
 const allow=f=>f.page.locator('[data-privacy-choice="allow"]').click();
@@ -158,19 +168,37 @@ test('real form acknowledgement sends only the allowed lead and never backfills 
   const f=await fixture({realForm:kind});
   if(allowed){await allow(f);await loaded(f);}
   await f.page.locator('form [type=submit]').click();
-  await f.page.locator('form [role=status]').filter({hasText:'was accepted'}).waitFor();
+  await f.page.waitForFunction(()=>document.querySelector('form .form-fields').hidden);
+  assert.equal(f.intakeRequests.length,1);assert.equal(f.intakeRequests[0].method,'POST');
+  assert.equal(f.intakeRequests[0].url,origin+(kind==='audit'?'/api/intake/audit':'/api/intake'));
+  assert.equal(f.intakeRequests[0].payload.business_name,'Synthetic Showroom');
+  if(kind==='audit')assert.equal(f.intakeRequests[0].payload.city,'Synthetic City');
+  assert.equal(f.requests.some(url=>url.includes('formsubmit.co')),false);
   assert.equal((await f.events()).filter(e=>e[1]==='Lead').length,allowed?1:0);
   if(!allowed){await allow(f);await loaded(f);assert.equal((await f.events()).filter(e=>e[1]==='Lead').length,0);}
   assert.doesNotMatch(JSON.stringify(await f.events()),/qa@example|Synthetic Showroom|Synthetic City/);
   await close(f);
  }
 });
-test('real form rejection, uncertain receipt and duplicate receipt do not send Lead',async()=>{
- for(const [kind,response] of [['audit','reject'],['audit','uncertain'],['mockup','duplicate']]){
+test('both real form kinds suppress Lead for rejection, uncertain receipt and duplicate receipt',async()=>{
+ for(const kind of ['audit','mockup'])for(const response of ['reject','uncertain','duplicate']){
   const f=await fixture({realForm:kind,response});await allow(f);await loaded(f);
   await f.page.locator('form [type=submit]').click();
   await f.page.waitForFunction(()=>!/Sending|^$/.test(document.querySelector('form [role=status]').textContent));
-  assert.equal((await f.events()).filter(e=>e[1]==='Lead').length,0);await close(f);
+  assert.equal(f.intakeRequests.length,1);
+  assert.equal((await f.events()).filter(e=>e[1]==='Lead').length,0);
+  assert.equal(await f.page.locator('form .form-fields').isVisible(),response!=='duplicate');await close(f);
+ }
+});
+test('both form kinds reject incomplete, mismatched and legacy acknowledgement contracts without tracking',async()=>{
+ for(const kind of ['audit','mockup'])for(const response of ['wrong-kind','missing-kind','missing-id','invalid-id','wrong-status','missing-duplicate','invalid-duplicate','legacy']){
+  const f=await fixture({realForm:kind,response});await allow(f);await loaded(f);
+  await f.page.locator('form [type=submit]').click();
+  await f.page.waitForFunction(()=>!/Sending|^$/.test(document.querySelector('form [role=status]').textContent));
+  assert.equal(f.intakeRequests.length,1);
+  assert.equal((await f.events()).filter(e=>e[1]==='Lead').length,0);
+  assert.equal(await f.page.locator('form .form-fields').isVisible(),true);
+  assert.equal(await f.page.locator('form [type=submit]').isDisabled(),true);await close(f);
  }
 });
 test('absent controls and disabled JavaScript cannot load tracking',async()=>{
@@ -183,6 +211,8 @@ test('privacy copy is current, distinguishes wrapper and providers, and contains
  const copy=execFileSync('python3',['-B','-c','from privacy_policy import privacy_content; print(privacy_content())'],{cwd:new URL('../tools/',import.meta.url),encoding:'utf8'});
  assert.match(copy,/Last updated November 5, 2026/);assert.match(copy,/Google Analytics is not currently configured/);
  assert.match(copy,/short-lived keyed identifiers/);assert.match(copy,/not every operation of Meta/);
+ assert.match(copy,/Growth audit and homepage design forms send requests to our website's intake service/);
+ assert.doesNotMatch(copy,/FormSubmit/i);
  assert.doesNotMatch(copy,/We only collect|process information only|reply STOP|we do not share/i);
  assert.doesNotMatch(script,/googletagmanager|gtag\(|G-[A-Z0-9]+/);
 });

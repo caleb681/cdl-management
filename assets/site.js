@@ -30,7 +30,13 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   const button = form.querySelector('[type=submit]');
   const fields = form.querySelector('.form-fields');
   const website = form.querySelector('[name=website]');
+  const kind = form.dataset.leadForm;
+  if (!['audit', 'mockup'].includes(kind)) continue;
+  const goal = form.querySelector('[name=goal]');
   let busy = false, complete = false, uncertain = false, offlineWarning = false;
+  goal?.addEventListener('change', () => {
+    if (!busy && !complete && !uncertain) button.textContent = goal.value.startsWith('Switch providers:') ? 'Request my switching review' : 'Request my free growth audit';
+  });
   const requiredInputs = [...form.querySelectorAll('input[required]')];
   for (const input of requiredInputs) input.addEventListener('input', () => input.setCustomValidity(''));
   website?.addEventListener('input', () => website.setCustomValidity(''));
@@ -56,38 +62,33 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
     status.tabIndex = -1; status.focus();
     fields.disabled = true;
     fields.setAttribute('aria-busy', 'true');
-    const kind = form.dataset.leadForm;
-    const payload = kind === 'audit' ? {
-      _subject: 'New CDL application: ' + values.showroom,
-      name: values.name, showroom: values.showroom, city: values.city,
-      email: values.email, phone: values.phone, website: values.website,
-      monthly_revenue: values.revenue, biggest_goal: values.goal
-    } : {
+    const payload = {
       business_name: values.showroom, name: values.name, contact_name: values.name,
       email: values.email, phone: values.phone, website: normalizeWebsite(values.website),
-      vertical: values.vertical, source: 'free-mockup', company_website_hp: ''
+      company_website_hp: '',
+      ...(kind === 'audit' ? {city: values.city, monthly_revenue: values.revenue, biggest_goal: values.goal} : {vertical: values.vertical})
     };
+    const requestLabel = kind === 'mockup' ? 'design request' : values.goal?.startsWith('Switch providers:') ? 'switching review request' : 'audit request';
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 18000);
     try {
-      const response = await fetch(kind === 'audit' ? 'https://formsubmit.co/ajax/caleb@cdl1.net' : '/api/intake', {
+      const response = await fetch(kind === 'audit' ? '/api/intake/audit' : '/api/intake', {
         method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
         body:JSON.stringify(payload),signal:controller.signal
       });
       if (!response.ok) {
-        // Explicit rejection is recoverable even when a provider returns an HTML error page.
+        // Explicit rejection is recoverable even when an error page is not JSON.
         // A server/network failure may have saved the request, so it remains uncertain.
-        if ([400,401,403,404,405,413,415,422,429].includes(response.status) || (kind === 'mockup' && response.status === 408)) throw new Error('rejected');
+        if ([400,401,403,404,405,408,413,415,422,429].includes(response.status)) throw new Error('rejected');
         throw new Error('uncertain');
       }
       let result; try { result = await response.json(); } catch { throw new Error('uncertain'); }
-      const acknowledged = kind === 'audit' ? result?.success === true || result?.success === 'true' : result?.ok === true;
-      if (!acknowledged) throw new Error('uncertain');
-      const duplicate = kind === 'mockup' && result.duplicate === true;
+      if (!validReceipt(result, kind)) throw new Error('uncertain');
+      const duplicate = result.duplicate === true;
       complete = true;
       fields.hidden = true;
       status.classList.add('form-success');
-      showFormStatus(status, duplicate ? 'We already received this design request. There is no need to send it again. Contact us below if you need to correct anything.' : kind === 'audit' ? 'Your application was accepted. We’ll review your showroom and contact you about the next step.' : 'Your design request was accepted. We’ll review your business and follow up by email.');
+      showFormStatus(status, duplicate ? `We already received this ${requestLabel}. There is no need to send it again. Contact us below if you need to correct anything.` : `We received your ${requestLabel}. We’ll review your request and contact you about the next step.`);
       if (!duplicate) try { window.cdlTrackLead?.(kind === 'audit' ? 'Growth Audit' : 'Free Mockup'); } catch {}
     } catch(error) {
       uncertain = error.message !== 'rejected';
@@ -99,6 +100,11 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   // this script is delayed or missing, without submitting details into a URL.
   button.disabled = false;
   form.querySelector('.form-fallback').hidden = true;
+}
+function validReceipt(result, kind) {
+  return result?.ok === true && result.status === 'received_unverified' && result.request_kind === kind &&
+    typeof result.duplicate === 'boolean' && typeof result.request_id === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(result.request_id);
 }
 function showFormStatus(status, message) {
   status.textContent = message;
