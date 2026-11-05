@@ -10,3 +10,9 @@
 
 /* Buyer guidance and the supplied portrait retain the shared responsive design. */
 .quote-panel p.muted{font:17px/1.65 var(--sans);letter-spacing:0}.quote-panel .text-link{margin-block:8px}.scope-note{font-size:15px;line-height:1.65}.article-layout caption{text-align:left;font-weight:650;padding:14px}.article-layout time{white-space:nowrap}
+/* Native mobile disclosure and resilient form states work before scripts load. */
+.mobile-disclosure{display:none}.menu-toggle{list-style:none}.menu-toggle::-webkit-details-marker{display:none}
+.form-fields{border:0;margin:0;padding:0;min-width:0}.form-recovery{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:12px}.form-recovery a{display:inline-flex;align-items:center;min-height:44px}
+body{overflow-wrap:anywhere}.brand{white-space:normal}.hero :focus-visible,.dark-section :focus-visible,.site-footer :focus-visible{outline-color:#fff9ef}
+@media(max-width:820px){.mobile-disclosure{display:block}.header-inner{padding-block:18px;padding-right:calc(24px + 7em)}.menu-toggle{position:absolute;top:18px;right:24px}.header-inner .brand{min-width:0}}
+@media(max-width:600px){.header-inner{padding-right:calc(20px + 7em)}.menu-toggle{right:20px}}

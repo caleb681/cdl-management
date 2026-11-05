@@ -124,19 +124,79 @@ test('mockup request retains current endpoint and sends correct contact field; e
  const p=await page();let payload,count=0;await p.route('**/api/intake',r=>{count++;payload=r.request().postDataJSON();return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});await p.goto(base+'/free-mockup/');await fill(p,'mockup');await p.locator('#website').fill('example.invalid');await p.locator('[type=submit]').click();await p.getByRole('status').filter({hasText:'design request was accepted'}).waitFor();assert.equal(count,1);assert.equal(payload.name,'Synthetic QA');assert.equal(payload.contact_name,'Synthetic QA');assert.equal(payload.website,'https://example.invalid');assert.equal(payload.source,'free-mockup');await p.context().close();
 });
 test('keyboard navigation, mobile Escape focus, FAQ and reduced motion',async()=>{
- const p=await page({viewport:{width:390,height:844},reducedMotion:'reduce'});await p.goto(base+'/');await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.textContent),'Skip to content');await p.keyboard.press('Enter');assert.equal(await p.evaluate(()=>document.activeElement.id),'main');await p.getByRole('button',{name:'Menu'}).click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.keyboard.press('Escape');assert.equal(await p.locator('#mobile-menu').isVisible(),false);assert.equal(await p.getByRole('button',{name:'Menu'}).evaluate(el=>el===document.activeElement),true);
+ const p=await page({viewport:{width:390,height:844},reducedMotion:'reduce'});await p.goto(base+'/');await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.textContent),'Skip to content');await p.keyboard.press('Enter');assert.equal(await p.evaluate(()=>document.activeElement.id),'main');await p.locator('.menu-toggle').click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.keyboard.press('Escape');assert.equal(await p.locator('#mobile-menu').isVisible(),false);assert.equal(await p.locator('.menu-toggle').evaluate(el=>el===document.activeElement),true);
  await p.locator('.faq-list summary').first().click();assert.equal(await p.locator('.faq-list details').first().getAttribute('open'),'');assert.equal(await p.evaluate(()=>getComputedStyle(document.documentElement).scrollBehavior),'auto');await p.context().close();
 });
 test('open mobile navigation resets when the viewport switches to desktop',async()=>{
  const p=await page({viewport:{width:390,height:844}});await p.goto(base+'/');
- await p.getByRole('button',{name:'Menu'}).click();await p.locator('#mobile-menu a').first().focus();
- await p.setViewportSize({width:1440,height:1000});await p.locator('#mobile-menu').waitFor({state:'hidden'});
- assert.equal(await p.locator('.menu-toggle').getAttribute('aria-expanded'),'false');assert.equal(await p.locator('.site-header .brand').evaluate(el=>el===document.activeElement),true);
+ await p.locator('.menu-toggle').click();await p.locator('#mobile-menu a').first().focus();
+ await p.setViewportSize({width:1440,height:1000});await p.waitForFunction(()=>document.querySelector('.mobile-disclosure').open===false);
+ assert.equal(await p.locator('.mobile-disclosure').evaluate(el=>el.open),false);assert.equal(await p.locator('.site-header .brand').evaluate(el=>el===document.activeElement),true);
  await p.setViewportSize({width:390,height:844});assert.equal(await p.locator('#mobile-menu').isVisible(),false);
- await p.getByRole('button',{name:'Menu'}).click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.context().close();
+ await p.locator('.menu-toggle').click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);await p.context().close();
 });
 test('core services, pricing and articles are available with JavaScript disabled',async()=>{
- const p=await page({javaScriptEnabled:false});for(const route of ['/','/services/local-seo/','/pricing/','/blog/local-seo-for-flooring-stores/']){await p.goto(base+route);assert.ok((await p.locator('main').innerText()).length>800);assert.equal(await p.locator('h1').count(),1);}await p.goto(base+'/contact/');assert.match(await p.locator('noscript').innerText(),/email/);assert.equal(await p.locator('[type=submit]').isDisabled(),true);assert.equal(await p.locator('form').getAttribute('method'),'post');await p.context().close();
+ const p=await page({javaScriptEnabled:false});for(const route of ['/','/services/local-seo/','/pricing/','/blog/local-seo-for-flooring-stores/']){await p.goto(base+route);assert.ok((await p.locator('main').innerText()).length>800);assert.equal(await p.locator('h1').count(),1);}await p.goto(base+'/contact/');assert.equal(await p.locator('.form-fallback').isVisible(),true);assert.match(await p.locator('.form-fallback').innerText(),/email/);assert.equal(await p.locator('[type=submit]').isDisabled(),true);assert.equal(await p.locator('form').getAttribute('method'),'post');await p.context().close();
+});
+test('mobile navigation and form fallback remain usable when JavaScript is absent',async()=>{
+ for(const missingScript of [false,true]){
+  const p=await page({viewport:{width:390,height:844},javaScriptEnabled:missingScript});
+  if(missingScript)await p.route('**/assets/site.js',r=>r.abort());
+  await p.goto(base+'/contact/');
+  await p.locator('.menu-toggle').focus();await p.keyboard.press('Enter');
+  assert.equal(await p.locator('#mobile-menu').isVisible(),true);
+  await p.keyboard.press('Space');assert.equal(await p.locator('#mobile-menu').isVisible(),false);
+  assert.equal(await p.locator('.form-fallback').isVisible(),true);
+  assert.equal(await p.locator('.form-fallback a[href^="tel:"]').count(),1);
+  assert.equal(await p.locator('.form-fallback a[href^="mailto:"]').count(),1);
+  assert.equal(await p.locator('[type=submit]').isDisabled(),true);
+  await p.context().close();
+ }
+});
+test('delayed JavaScript preserves a mobile menu already opened by the visitor',async()=>{
+ const p=await page({viewport:{width:390,height:844}});let release;
+ const ready=new Promise(resolve=>release=resolve);
+ await p.route('**/assets/site.js',async r=>{await ready;await r.continue();});
+ await p.goto(base+'/contact/',{waitUntil:'commit'});
+ await p.locator('.menu-toggle').click();assert.equal(await p.locator('#mobile-menu').isVisible(),true);
+ release();await p.locator('.form-fallback').waitFor({state:'hidden'});
+ assert.equal(await p.locator('#mobile-menu').isVisible(),true);
+ await p.keyboard.press('Escape');assert.equal(await p.locator('#mobile-menu').isVisible(),false);
+ await p.context().close();
+});
+test('offline hints do not send prematurely or prevent an explicit later attempt',async()=>{
+ for(const reconnect of [true,false]){
+  const p=await page();let count=0;
+  await p.addInitScript(()=>{window.qaOnline=false;Object.defineProperty(navigator,'onLine',{get:()=>window.qaOnline});});
+  await p.route('https://formsubmit.co/**',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:'{"success":true}'});});
+  await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();
+  assert.match(await p.getByRole('status').innerText(),/We have not sent/);assert.equal(count,0);
+  assert.equal(await p.locator('[type=submit]').isEnabled(),true);assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');
+  if(reconnect)await p.evaluate(()=>window.qaOnline=true);
+  await p.getByRole('button',{name:'Try sending anyway'}).click();
+  await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();assert.equal(count,1);
+  await p.context().close();
+ }
+});
+test('pending requests lock editing, rejected requests restore it and recovery contacts are actionable',async()=>{
+ for(const kind of ['audit','mockup']){
+  const p=await page();let release,payload;
+  const ready=new Promise(resolve=>release=resolve);
+  await p.route(kind==='audit'?'https://formsubmit.co/**':'**/api/intake',async r=>{payload=r.request().postDataJSON();await ready;await r.fulfill({status:422,contentType:'text/html',body:'Rejected'});});
+  await p.goto(base+(kind==='audit'?'/contact/':'/free-mockup/'));await fill(p,kind);
+  await p.locator('[type=submit]').click();assert.equal(await p.locator('#email').isDisabled(),true);
+  assert.match(await p.getByRole('status').innerText(),/Sending your request/);
+  assert.equal(await p.getByRole('status').evaluate(e=>e===document.activeElement),true);
+  assert.equal(await p.locator('.form-fields').getAttribute('aria-busy'),'true');
+  assert.equal(await p.locator('form').getAttribute('aria-busy'),null);
+  assert.equal(await p.locator('#name').isDisabled(),true);assert.equal(await p.locator('select').first().isDisabled(),true);
+  release();await p.getByRole('status').filter({hasText:'not accepted'}).waitFor();
+  assert.equal(payload.email,'qa@example.invalid');assert.equal(await p.locator('#email').isEnabled(),true);
+  assert.equal(await p.locator('[type=submit]').isEnabled(),true);
+  assert.equal(await p.getByRole('status').locator('a[href="tel:+16606653889"]').count(),1);
+  assert.equal(await p.getByRole('status').locator('a[href="mailto:caleb@cdl1.net"]').count(),1);
+  await p.context().close();
+ }
 });
 test('capture current desktop and mobile review images',async()=>{
  const p=await page();for(const [label,width,height] of [['desktop',1440,1000],['mobile',390,844]]){await p.setViewportSize({width,height});await p.goto(base+'/');await p.screenshot({path:evidence+'/homepage-'+label+'.png',fullPage:true});}await p.context().close();
@@ -155,4 +215,84 @@ test('malformed encoded addresses return400 and the isolated preview remains ava
   const bad=await fetch(url+'/%E0%A4%A');assert.equal(bad.status,400);assert.equal(await bad.text(),'Invalid address');
   const valid=await fetch(url+'/');assert.equal(valid.status,200);assert.match(await valid.text(),/Marketing built for/);
  }finally{child.kill('SIGTERM');}
+});
+
+// Paste into tests/browser.test.mjs; uses its test, assert, page() and base.
+// Browser-only regressions, not a screen-reader or native-zoom certification.
+test('keyboard focus stays visible against representative light and dark surfaces',async()=>{
+ const p=await page({viewport:{width:1280,height:900},reducedMotion:'reduce'});
+ try{
+  await p.goto(base+'/');
+  for(const selector of ['.hero-actions .btn','#main .contact-links a[href^="tel:"]','.site-footer a[href^="tel:"]']){
+   const target=p.locator(selector).first();
+   await target.focus();await p.keyboard.press('Tab');await p.keyboard.press('Shift+Tab');
+   const style=await target.evaluate(el=>{
+    const color=value=>{const parts=value.match(/[\d.]+/g).map(Number);return{rgb:parts.slice(0,3),alpha:parts[3]??1};};
+    const foreground=color(getComputedStyle(el).outlineColor);
+    let ancestor=el.parentElement,background;
+    while(ancestor){
+     const candidate=color(getComputedStyle(ancestor).backgroundColor);
+     if(candidate.alpha>0){background=candidate;break;}
+     ancestor=ancestor.parentElement;
+    }
+    return{focused:el===document.activeElement,visible:el.matches(':focus-visible'),
+     outlineStyle:getComputedStyle(el).outlineStyle,outlineWidth:parseFloat(getComputedStyle(el).outlineWidth),
+     foreground,background};
+   });
+   assert.ok(style.focused&&style.visible,selector+' needs keyboard-visible focus');
+   assert.ok(style.outlineStyle!=='none'&&style.outlineWidth>0,selector+' needs a visible outline');
+   assert.ok(style.background,selector+' needs a measurable surrounding surface');
+   // Fail explicitly if a new translucent design needs compositing, rather than
+   // silently calculating an invalid ratio from uncomposited colors.
+   assert.equal(style.foreground.alpha,1,selector+' outline requires alpha compositing');
+   assert.equal(style.background.alpha,1,selector+' surface requires alpha compositing');
+   const luminance=rgb=>rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4)
+    .reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+   const a=luminance(style.foreground.rgb),b=luminance(style.background.rgb);
+   const contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+   assert.ok(contrast>=3,selector+' focus contrast '+contrast.toFixed(2)+' must be at least 3:1');
+  }
+ }finally{await p.context().close();}
+});
+
+test('200 percent modeled text enlargement preserves reflow, Menu and hero content',async()=>{
+ const p=await page({viewport:{width:390,height:844},reducedMotion:'reduce'});
+ try{
+  for(const route of ['/','/contact/','/pricing/','/switch/','/compare/broadlume/']){
+   await p.goto(base+route);
+   // Snapshot before applying changes so inherited sizes are doubled once.
+   // This reproduces the original text-only stress case, not native zoom.
+   await p.evaluate(()=>{
+    const sizes=[...document.querySelectorAll('body *')].map(el=>[el,parseFloat(getComputedStyle(el).fontSize)]);
+    for(const[el,size]of sizes)el.style.fontSize=size*2+'px';
+   });
+   const layout=await p.evaluate(()=>{
+    const menu=document.querySelector('.menu-toggle'),r=menu.getBoundingClientRect();
+    return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,
+     menu:{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+   });
+   assert.ok(layout.scrollWidth<=layout.width+1,route+' has page-level horizontal overflow');
+   assert.ok(layout.menu.width>0&&layout.menu.height>0,route+' Menu must remain visible');
+   assert.ok(layout.menu.left>=0&&layout.menu.right<=layout.width+1&&layout.menu.top>=0&&layout.menu.bottom<=layout.height+1,
+    route+' Menu must remain inside the viewport');
+   await p.locator('.menu-toggle').focus();await p.keyboard.press('Enter');
+   assert.ok(await p.locator('#mobile-menu').isVisible(),route+' enlarged Menu must open');
+   await p.keyboard.press('Escape');
+   assert.equal(await p.locator('#mobile-menu').isVisible(),false,route+' enlarged Menu must close');
+   if(route==='/'){
+    const content=await p.locator('.hero h1').evaluate(heading=>{
+     const hero=heading.closest('.hero').getBoundingClientRect();
+     const range=document.createRange();range.selectNodeContents(heading);
+     return{text:heading.textContent.trim(),hero:{left:hero.left,right:hero.right,top:hero.top,bottom:hero.bottom},
+      rects:[...range.getClientRects()].filter(r=>r.width&&r.height).map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom}))};
+    });
+    assert.ok(content.text&&content.rects.length,'hero heading must retain rendered text');
+    for(const r of content.rects)assert.ok(r.left>=content.hero.left-1&&r.right<=content.hero.right+1&&r.top>=content.hero.top-1&&r.bottom<=content.hero.bottom+1,
+     'enlarged hero heading must fit inside its clipping ancestor');
+    const cta=p.locator('.hero-actions .btn');
+    await cta.focus();
+    assert.ok(await cta.evaluate(el=>el===document.activeElement),'hero CTA must remain keyboard reachable');
+   }
+  }
+ }finally{await p.context().close();}
 });
