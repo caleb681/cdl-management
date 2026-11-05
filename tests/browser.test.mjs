@@ -158,6 +158,14 @@ test('explicit body timeout, size and media-type rejection keeps details editabl
   assert.equal(await p.evaluate(()=>window.qaTracked),undefined);await p.context().close();
  }
 });
+test('an unverified audit-provider timeout stays uncertain and cannot resend automatically',async()=>{
+ const p=await page();let count=0;
+ await p.route('https://formsubmit.co/**',r=>{count++;return r.fulfill({status:408,contentType:'application/json',body:'{}'});});
+ await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();
+ await p.locator('form').getByRole('status').filter({hasText:'could not confirm'}).waitFor();
+ assert.equal(count,1);assert.equal(await p.locator('[type=submit]').isDisabled(),true);assert.equal(await p.locator('#email').inputValue(),'qa@example.invalid');
+ await p.context().close();
+});
 test('optional website validation rejects unsafe addresses and allows correction',async()=>{
  const p=await page();let count=0;
  await p.route('**/api/intake',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});

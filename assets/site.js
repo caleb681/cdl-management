@@ -77,7 +77,7 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
       if (!response.ok) {
         // Explicit rejection is recoverable even when a provider returns an HTML error page.
         // A server/network failure may have saved the request, so it remains uncertain.
-        if ([400,401,403,404,405,408,413,415,422,429].includes(response.status)) throw new Error('rejected');
+        if ([400,401,403,404,405,413,415,422,429].includes(response.status) || (kind === 'mockup' && response.status === 408)) throw new Error('rejected');
         throw new Error('uncertain');
       }
       let result; try { result = await response.json(); } catch { throw new Error('uncertain'); }
