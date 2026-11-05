@@ -193,6 +193,22 @@ test('an audit body timeout preserves details and permits one deliberate correct
  await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'We received your audit request'}).waitFor();assert.equal(count,2);
  await p.context().close();
 });
+test('complete email validation focuses the field before sending and allows correction on every form',async()=>{
+ for(const [route,kind] of [['/','audit'],['/contact/','audit'],['/free-mockup/','mockup']]){
+  const p=await page();let count=0;
+  await p.route(kind==='audit'?'**/api/intake/audit':'**/api/intake',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:receipt(kind)});});
+  await p.goto(base+route);await fill(p,kind);await p.locator('#email').fill('qa@showroom');
+  await p.locator('[type=submit]').click();assert.equal(count,0);
+  assert.equal(await p.locator('#email').evaluate(e=>e===document.activeElement),true);
+  assert.equal(await p.locator('#email').evaluate(e=>e.validity.customError),true);
+  assert.match(await p.locator('#email').evaluate(e=>e.validationMessage),/complete email address.*name@example\.com/);
+  assert.equal(await p.locator('#showroom').inputValue(),'Synthetic QA Showroom');
+  await p.locator('#email').fill('qa+sales@showroom.example.invalid');
+  assert.equal(await p.locator('#email').evaluate(e=>e.validity.customError),false);
+  await p.locator('[type=submit]').click();await p.locator('form').getByRole('status').filter({hasText:'We received your'}).waitFor();assert.equal(count,1);
+  await p.context().close();
+ }
+});
 test('optional website validation rejects unsafe addresses and allows correction',async()=>{
  const p=await page();let count=0;
  await p.route('**/api/intake',r=>{count++;return r.fulfill({status:200,contentType:'application/json',body:receipt('mockup')});});

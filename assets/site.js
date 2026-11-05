@@ -30,6 +30,7 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   const button = form.querySelector('[type=submit]');
   const fields = form.querySelector('.form-fields');
   const website = form.querySelector('[name=website]');
+  const email = form.querySelector('[name=email]');
   const kind = form.dataset.leadForm;
   if (!['audit', 'mockup'].includes(kind)) continue;
   const goal = form.querySelector('[name=goal]');
@@ -44,6 +45,8 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
     e.preventDefault();
     if (busy || complete || uncertain) return;
     for (const input of requiredInputs) input.setCustomValidity(input.value.trim() ? '' : 'Please enter a value.');
+    // Match the intake policy before sending so the invalid field is identified.
+    if (email) email.setCustomValidity(validEmail(email.value.trim()) ? '' : 'Enter a complete email address, such as name@example.com.');
     if (website) website.setCustomValidity(validWebsite(website.value) ? '' : 'Enter a website address such as yourshowroom.com, or leave this optional field blank.');
     if (!form.reportValidity()) return;
     const values = Object.fromEntries([...new FormData(form)].map(([name, value]) => [name, String(value).trim()]));
@@ -105,6 +108,9 @@ function validReceipt(result, kind) {
   return result?.ok === true && result.status === 'received_unverified' && result.request_kind === kind &&
     typeof result.duplicate === 'boolean' && typeof result.request_id === 'string' &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(result.request_id);
+}
+function validEmail(value) {
+  return /^[^\s@<>()"\\,;:]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i.test(value);
 }
 function showFormStatus(status, message) {
   status.textContent = message;
