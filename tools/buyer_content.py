@@ -1,5 +1,6 @@
 """Buyer guidance page bodies for the local CDL Marketing review build."""
 from website_offer import PRICE, EXIT_SUMMARY
+from transition_offer import MARKETING_SUMMARY, transition_preview
 
 
 def comparison_body() -> str:
@@ -15,6 +16,9 @@ def comparison_body() -> str:
 <h2>What CDL brings to the decision</h2>
 <p>We run flooring showrooms ourselves. That experience shapes how we approach a homeowner's search, product questions and first contact with the store. <a href="/about/">Meet the people behind CDL</a> and the businesses that inform our work.</p>
 <p>Our current offer centers on <a href="/services/local-seo/">local SEO</a>, <a href="/services/paid-ads/">paid advertising</a>, <a href="/services/websites/">showroom websites</a> and <a href="/services/ai-search/">AI search visibility</a>. We agree on the work before starting. CRM integration is planned for later and is not available in our current offer.</p>
+<p><strong>No long-term marketing contract.</strong> {MARKETING_SUMMARY}</p>
+
+{transition_preview()}
 
 <h2>Compare the proposals side by side</h2>
 <div class="tbl" role="region" aria-label="Comparison of CDL Marketing and Broadlume or Cyncly published offers" tabindex="0">
@@ -23,8 +27,8 @@ def comparison_body() -> str:
 <tbody>
 <tr><th scope="row">What am I buying?</th><td>A scoped marketing service informed by showroom operating experience.</td><td>A flooring website and technology offering with feature tiers and additional services.</td></tr>
 <tr><th scope="row">What happens to my current systems?</th><td>We assess the website and marketing access needed. CRM integration is future work.</td><td>Packages list connected website tools and RLM seats. Confirm compatibility with your specific systems.</td></tr>
-<tr><th scope="row">What will I pay?</th><td>{PRICE} for one showroom, up to eight content pages, hosting/care and 45 minutes of monthly edits. <a href="/pricing/">Review the full plan</a>. Marketing and advertising spend are separate.</td><td>The reviewed package table has no dollar rates. Request a proposal for the equivalent scope.</td></tr>
-<tr><th scope="row">Who controls the accounts, and how do I leave?</th><td>{EXIT_SUMMARY} <a href="/pricing/#terms">Read payment and handover terms</a>.</td><td>These contract terms were not established by this public-page review. Ask for the applicable agreement.</td></tr>
+<tr><th scope="row">What will I pay?</th><td>Recommended standalone website plan: {PRICE} for one showroom, up to eight content pages, hosting/care and 45 minutes of monthly edits. <a href="/pricing/">Review the full plan</a>. Marketing and advertising spend are separate. Proposed transition credits need separate review and approval.</td><td>The reviewed package table has no dollar rates. Request a proposal for the equivalent scope.</td></tr>
+<tr><th scope="row">Who controls the accounts, and how do I leave?</th><td>For the recommended standalone website plan: {EXIT_SUMMARY} Month-to-month marketing has separately agreed scope, fees and notice. <a href="/pricing/#terms">Read payment and handover terms</a>.</td><td>These contract terms were not established by this public-page review. Ask for the applicable agreement.</td></tr>
 </tbody></table></div>
 
 <div class="callout"><h3>Compare evidence, too</h3><p>A service list describes an offer. It does not establish your likely results. Ask each provider for relevant examples, measurement definitions and the limits of its evidence. CDL's operating experience is not a verified client-results history.</p></div>

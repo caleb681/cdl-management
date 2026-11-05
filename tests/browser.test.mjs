@@ -71,6 +71,21 @@ test('audit can be acknowledged without optional phone, revenue, goal or website
  assert.equal(count,1);for(const key of ['phone','monthly_revenue','biggest_goal','website'])assert.equal(payload[key],'');
  await p.context().close();
 });
+test('transition inquiries preserve the selected service path without granting a credit',async()=>{
+ for(const goal of ['Switch providers: website only','Switch providers: SEO and advertising']){
+  const p=await page();let payload,count=0;
+  await p.route('https://formsubmit.co/**',r=>{count++;payload=r.request().postDataJSON();return r.fulfill({status:200,contentType:'application/json',body:'{"success":true}'});});
+  await p.goto(base+'/contact/#switching');
+  assert.match(await p.locator('#switching').innerText(),/proposed/i);
+  assert.match(await p.locator('#switching').innerText(),/does not (activate|approve)/i);
+  await fill(p);await p.locator('#goal').selectOption({label:goal});
+  await p.locator('[type=submit]').click();
+  await p.getByRole('status').filter({hasText:'application was accepted'}).waitFor();
+  assert.equal(count,1);assert.equal(payload.biggest_goal,goal);
+  assert.doesNotMatch(await p.getByRole('status').innerText(),/(credit|offer|eligibility).{0,12}(approved|activated|granted)/i);
+  await p.context().close();
+ }
+});
 test('explicit rejection keeps values, allows correction and does not track',async()=>{
  const p=await page();let count=0;
  await p.route('https://formsubmit.co/**',r=>{count++;return r.fulfill({status:422,contentType:'application/json',body:'{"success":false}'});});

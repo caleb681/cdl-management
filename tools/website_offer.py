@@ -23,12 +23,12 @@ EXIT_SUMMARY = ('Month-to-month after launch. Cancel with 30 days’ notice, wit
 SEPARATE = ('Local SEO campaigns, ongoing AI-search work, advertising management '
             'and licensed product tools are quoted separately. Ad spend is extra. '
             'CRM integration is planned for later and is not included.')
-PRICE_DESCRIPTION = (f'Showroom websites: {PRICE}. Eight pages, hosting, care and '
+PRICE_DESCRIPTION = (f'Recommended website plan: {PRICE}. Up to eight pages, hosting, care and '
                      '45 minutes of monthly edits. Marketing and ad spend are separate.')
 
 PLAN_FAQ = (
     'What does the website plan include?',
-    f'{PRICE}. {SUMMARY} Setup includes {REVISION_ROUNDS} consolidated revision rounds. '
+    f'Our recommended standalone website plan is {PRICE}. {SUMMARY} Setup includes {REVISION_ROUNDS} consolidated revision rounds. '
     f'{EXIT_SUMMARY} {SEPARATE} <a href="/pricing/">See the full scope and terms.</a>'
 )
 
@@ -97,10 +97,11 @@ PLAN_FAQS = [
 
 def pricing_content():
     """Return the full visible plan scope; expandable details are added by build."""
-    return f'''<div class="callout"><span class="eyebrow">CDL Showroom Website</span>
+    return f'''<div class="callout"><span class="eyebrow">Recommended standalone website plan</span>
 <h2>A better website for your flooring showroom.</h2>
 <p class="answer"><strong>{PRICE}</strong></p><p>{SUMMARY}</p>
 <p>{EXIT_SUMMARY}</p><p><a class="btn" href="/contact/">Discuss my website <span aria-hidden="true">→</span></a></p>
+<p>This is the recommended website-only scope for review. Proposed switching credits need separate written approval; their setup-fee treatment is still open. <a href="/switch/">Review the two proposed transition paths.</a></p>
 <p><a href="#included">See exactly what is included ↓</a></p></div>
 <nav class="toc" aria-label="On this page"><b>Know the full scope</b><a href="#included">The build</a><a href="#care">Monthly care</a><a href="#separate">Separate costs</a><a href="#terms">Payments &amp; leaving</a></nav>
 <section id="included"><h2>What setup includes</h2>
