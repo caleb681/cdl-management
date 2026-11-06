@@ -20,7 +20,9 @@ Edit `tools/build.py` for pages, `assets/site.css` for layout, and `assets/site.
 
 ## Photo
 
-The homepage uses Caleb's supplied real March portrait. The original remains unchanged at `../photo-review/isolated/CDL-Marketing/site/assets/caleb-portrait.jpg` (1574 × 2702, 934,083 bytes; SHA-256 `47fcf0d951289ebf4c787fa51722cc7bdba69c1fd746396dc893a8419b668af3`). `assets/caleb-portrait.webp` is a technical resize/encoding only: 700 × 1202, WebP quality 82, 110,534 bytes; SHA-256 `1e8cbc30e2e7e9138d8e6e3a8553b3dca511465971b8e1498adadaad36fe0c13`. `assets/caleb-portrait-400.webp` is a second technical resize/encoding from that same original: 400 × 687, WebP quality 80, 46,332 bytes; SHA-256 `c0f7a1f381b3ad2d60b16746a7e5e5db0f4de6b8a3086bf96efdea7478abf6a0`. The portrait uses 400w/700w `srcset` with viewport-aware `sizes`, retaining 700 × 1202 intrinsic dimensions and high fetch priority. No identity change, generative editing or face retouching. Explicit dimensions and high fetch priority are in the template. The derivative was visually inspected; inspect rendered focal point/caption and verify performance before release.
+Caleb requested an illustrative edit showing him standing in a flooring showroom and removal of Owner as his descriptor. The current hero uses `assets/caleb-showroom.webp` (800 × 1000, 108,820 bytes) and `assets/caleb-showroom-400.webp` (400 × 500, 32,812 bytes). Both are responsive technical encodings of the built-in image-generation edit of his supplied March portrait. The scene is illustrative, not a documentary photograph of a named store. Alt text reflects that distinction; the caption is Caleb Foglesong / CDL Marketing. The original photo and earlier derivatives are retained.
+
+Source and prompt provenance live outside this public repository at `../research/conversion-upgrade/image-provenance.json` and `../research/conversion-upgrade/IMAGE-PROMPT.md`. No replacement job title is asserted. The Person schema and visible byline links use the same About identity.
 
 ## Commercial draft
 
@@ -76,3 +78,7 @@ Preserve existing `/command/` and production route overlays such as `/api/*`, `/
 - Posts live at `blog/SLUG/index.html` (https://cdlmanagement.com/blog/SLUG/).
 - Existing article bodies come from `source/articles/SLUG/index.html` when present, otherwise `source/legacy/blog/SLUG/index.html`. To add a new article, extend the generator and `ARTICLE_INFO` list. Preserve meaningful original URLs and dates. The old `_templates/blog-post.html` remains as a reference, not a live build input.
 - `_templates/` is not published (see `.assetsignore`).
+
+## Buying clarity and sample work
+
+`tools/proof_content.py` generates `/work-samples/`: an illustrative three-priority audit, flooring page concept and monthly report format. These examples demonstrate the approach, not actual client results. `tools/service_examples.py` adds concrete flooring scenarios to each service page. The homepage presents website, local SEO and advertising choices before switching incentives, and links to AI search as related separately scoped work. The existing proposed prices, fees and terms remain proposed. No result history or ranking guarantee was added.

@@ -10,6 +10,11 @@
 
 /* Buyer guidance and the supplied portrait retain the shared responsive design. */
 .quote-panel p.muted{font:17px/1.65 var(--sans);letter-spacing:0}.quote-panel .text-link{margin-block:8px}.scope-note{font-size:15px;line-height:1.65}.article-layout caption{text-align:left;font-weight:650;padding:14px}.article-layout time{white-space:nowrap}
+/* Service choice and illustrative work stay readable without extra scripts. */
+.hero-art .showroom-portrait{height:auto;aspect-ratio:4/5;object-fit:cover;object-position:center;border-radius:140px 140px 6px 6px}.hero-art{align-self:center;min-height:0}.hero-note{font-size:14px;letter-spacing:0}.hero .hero-actions .text-link{font-size:15px}.buying-choices .article-type{font-size:10px;line-height:1.6;letter-spacing:1.3px}.buying-choices h3{font-size:31px}.buying-choices .choice-price{padding-top:18px;border-top:1px solid var(--line);font-size:14px;line-height:1.7}.choice-price b{color:var(--ink)}.search-note{padding:20px 24px;background:#eee6da;border-left:3px solid var(--accent)}.reason-list{padding-left:20px;font-size:15px;line-height:1.7}.reason-list li{margin-bottom:16px}.quote-panel .bio-copy{font:17px/1.65 var(--sans);letter-spacing:0}.quote-panel .bio-intro{font:600 16px/1.5 var(--sans);letter-spacing:0}.article-layout .callout h2{margin-top:0}.article-meta a{color:var(--muted)}
+.quote-panel p.scope-note{font:15px/1.65 var(--sans);letter-spacing:0}.article-layout .report-sample table{min-width:760px}.report-sample th:first-child{min-width:140px}.article-layout .report-sample td{font-weight:400}
+@media(max-width:820px){.buying-choices{grid-template-columns:1fr}.buying-choices .choice-price{width:100%}.hero-art .showroom-portrait{border-radius:100px 100px 6px 6px}}
+@media(max-width:600px){.hero-art .showroom-portrait{border-radius:100px 100px 6px 6px}.hero-note{font-size:13px}.hero-art{padding-bottom:36px}.portrait-caption{bottom:48px}.hero h1{font-size:clamp(39px,10.4vw,49px)}}
 /* Native mobile disclosure and resilient form states work before scripts load. */
 .mobile-disclosure{display:none}.menu-toggle{list-style:none}.menu-toggle::-webkit-details-marker{display:none}
 .form-fields{border:0;margin:0;padding:0;min-width:0}.form-recovery{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:12px}.form-recovery a{display:inline-flex;align-items:center;min-height:44px}

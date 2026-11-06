@@ -6,7 +6,7 @@ from transition_offer import MARKETING_SUMMARY, transition_preview
 def comparison_body() -> str:
     """Return the comparison article; the caller supplies its hero and CTA."""
     return f'''<section class="section"><article class="wrap article-layout" aria-label="CDL Marketing and Broadlume comparison">
-<p class="article-meta">Reviewed <time datetime="2026-11-04">November 4, 2026</time> · Published by CDL Marketing</p>
+<p class="article-meta">Reviewed <time datetime="2026-11-05">November 5, 2026</time> · Published by CDL Marketing</p>
 <p class="answer">Considering a Broadlume alternative? Compare the work your showroom needs, the systems you already use and the terms in each proposal. Broadlume, now a Cyncly company, offers a broad flooring technology platform. CDL brings an operator's perspective to a focused marketing engagement.</p>
 
 <h2>Where Broadlume and Cyncly are strong</h2>
@@ -18,7 +18,8 @@ def comparison_body() -> str:
 <p>Our current offer centers on <a href="/services/local-seo/">local SEO</a>, <a href="/services/paid-ads/">paid advertising</a>, <a href="/services/websites/">showroom websites</a> and <a href="/services/ai-search/">AI search visibility</a>. We agree on the work before starting. CRM integration is planned for later and is not available in our current offer.</p>
 <p><strong>No long-term marketing contract.</strong> {MARKETING_SUMMARY}</p>
 
-{transition_preview()}
+<h2>Choose the fit before comparing the fee</h2>
+<p>If an integrated catalog, visualizer or retail software package is central to your decision, review those tools in detail. If you want a focused marketing scope around your existing site and systems where access allows, start with the work CDL would take on. Request equivalent deliverables and separate costs before comparing proposals.</p>
 
 <h2>Compare the proposals side by side</h2>
 <div class="tbl" role="region" aria-label="Comparison of CDL Marketing and Broadlume or Cyncly published offers" tabindex="0">
@@ -31,7 +32,9 @@ def comparison_body() -> str:
 <tr><th scope="row">Who controls the accounts, and how do I leave?</th><td>Under the proposed standalone website plan: {EXIT_SUMMARY} Month-to-month marketing has separately agreed scope, fees and notice. <a href="/pricing/#terms">Read payment and handover terms</a>.</td><td>These contract terms were not established by this public-page review. Ask for the applicable agreement.</td></tr>
 </tbody></table></div>
 
-<div class="callout"><h3>Compare evidence, too</h3><p>A service list describes an offer. It does not establish your likely results. Ask each provider for relevant examples, measurement definitions and the limits of its evidence. CDL's operating experience is not a verified client-results history.</p></div>
+<div class="callout"><h3>Compare evidence, too</h3><p>A service list describes an offer. It does not establish your likely results. Ask each provider for relevant examples, measurement definitions and the limits of its evidence. <a href="/work-samples/">See our sample audit, page concept and report</a> to understand the approach. These are illustrative examples, separate from our showroom operating background.</p></div>
+
+{transition_preview()}
 
 <h2>Make the next step useful</h2>
 <p>Bring your website, current provider scope and the problem you want solved. We can discuss whether CDL's marketing services fit. Our <a href="/guides/choosing-a-flooring-marketing-agency/">agency buying guide</a> gives you questions to use with any provider.</p>
@@ -50,7 +53,7 @@ def agency_guide_body() -> str:
 <li><h3>What will you do for my showroom?</h3><p>Ask for specific deliverables, locations covered, responsibilities and exclusions. Separate <a href="/services/local-seo/">local SEO</a>, <a href="/services/paid-ads/">ads</a> and <a href="/services/websites/">website work</a>. A broad service label is not a work plan.</p></li>
 <li><h3>Do you understand how flooring is sold?</h3><p>Discuss products, service areas, installation questions and how customers request a measure. Ask for relevant experience. Our <a href="/about/">showroom operating background</a> informs our approach, but experience alone does not prove client results.</p></li>
 <li><h3>What does the full bill include?</h3><p>Request separate lines for platform or hosting fees, agency management, setup, content and advertising spend. Ask what changes the price and which optional tools cost extra. Compare the same scope across proposals.</p></li>
-<li><h3>What proof can you show?</h3><p>Ask for examples with dates, starting conditions, work completed and spend context. Check whether a result means inquiries, booked measures, sold jobs or collected revenue. A percentage without a baseline can hide more than it explains.</p></li>
+<li><h3>What proof can you show?</h3><p><a href="/work-samples/">See our sample review and reporting format</a>, then ask how the proposed work would apply to your showroom. Ask for examples with dates, starting conditions, work completed and spend context. Check whether a result means inquiries, booked measures, sold jobs or collected revenue. A percentage without a baseline can hide more than it explains.</p></li>
 <li><h3>Who controls the website and accounts?</h3><p>Confirm domain registration, hosting, content rights, administrator access and control of ad and analytics accounts. Put cancellation, export, handover and any transfer charges in writing before signing.</p></li>
 <li><h3>What access will you need?</h3><p>Agree on website, business-profile and advertising permissions. If CRM access or integration is proposed, identify the supported connection, data involved, owner and testing plan. Ask what happens if that connection is unavailable.</p></li>
 <li><h3>How will we know what is working?</h3><p>Agree on a qualified inquiry and which outcomes you can reliably record. Ask to see a sample report that explains findings, missing data and next actions. Calls and forms should not automatically be counted as sales.</p></li>
