@@ -116,6 +116,8 @@ def home():
 
 ARTICLE_INFO=[('local-seo-for-flooring-stores','Local search','Local SEO for flooring stores: a practical checklist','Start with your Business Profile, consistent information and useful local pages.'),('marketing-for-flooring-stores','Showroom growth','A practical plan for showroom inquiries','How search, your website and follow-up work together.'),('flooring-store-chatgpt-ai-search','AI search','How flooring stores can show up in AI search','Clear business details and helpful answers give search services usable information.'),('google-business-profile-for-flooring-stores','Google Business Profile','A practical Business Profile checklist','Give homeowners accurate hours, a useful description and the right next step.')]
 
+ARTICLE_INFO += [('flooring-store-call-tracking','Call tracking','How a flooring store should track phone calls','Connect inquiries to their source and understand the limits of your call reports.'),('flooring-store-website-checklist','Website checklist','What a flooring store website should have','Check the pages, contact paths and business details shoppers need.')]
+
 def articles_cards(all_posts=False):
  return '<div class="article-grid">'+''.join(f'<article class="article-card"><p class="article-type">{tag}</p><h3><a href="/blog/{slug}/">{title}</a></h3><p>{desc}</p>{link("/blog/"+slug+"/","Read the guide")}</article>' for slug,tag,title,desc in (ARTICLE_INFO if all_posts else ARTICLE_INFO[:3]))+'</div>'
 
@@ -202,7 +204,7 @@ def contact():
 
 def legacy_pages():
  # Keep existing article bodies, publication dates and addresses. Refresh only shared presentation.
- for f in (LEGACY/'blog').glob('*/index.html'):
+ for f in sorted({f.parent.name: f for f in [*(LEGACY/'blog').glob('*/index.html'), *(ROOT/'source/articles').glob('*/index.html')]}.values()):
   slug=f.parent.name
   override=ROOT/'source/articles'/slug/'index.html'
   old=(override if override.exists() else f).read_text()
@@ -212,7 +214,7 @@ def legacy_pages():
   article=re.search(r'<article>(.*?)</article>',old,re.S)[1]
   article=re.sub(r'<p class="article-updated">.*?</p>','',article,count=1,flags=re.S)
   # Old article wrappers carried their own .wrap class. Keep prose, not old layout.
-  article=article.replace('class="tbl"','class="tbl" role="region" aria-label="AI search comparison worksheet" tabindex="0"')
+  article=article.replace('class="tbl"','class="tbl" role="region" aria-label="Article comparison table" tabindex="0"')
   article=article.replace('class="wrap prose"','class="prose"').replace('class="wrap article-body"','class="prose"')
   article=re.sub(r'<div class="wrap[^\"]*">','<div>',article)
   schemas=[]
