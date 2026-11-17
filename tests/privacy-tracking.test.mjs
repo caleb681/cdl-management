@@ -225,3 +225,12 @@ test('Google Analytics loads only after allow, once, and a blocked Google script
  assert.equal(await f.page.evaluate(()=>window.cdlTrackLead('Growth Audit')),true);
  await decline(f);assert.equal(await f.page.evaluate(()=>window['ga-disable-G-8DXWWYNGC8']),true);await close(f);
 });
+
+test('phone taps send Contact once after allow and nothing before or after decline',async()=>{
+ const tap=f=>f.page.evaluate(()=>{const a=document.createElement('a');a.href='tel:+10000000000';a.textContent='Call';a.addEventListener('click',e=>e.preventDefault());document.body.append(a);a.click();a.remove();});
+ const contacts=async f=>(await f.events()).filter(e=>e[0]==='track'&&e[1]==='Contact').length;
+ const off=await fixture();await tap(off);assert.equal(off.sdkRequests(),0);assert.deepEqual(await off.events(),[]);await close(off);
+ const f=await fixture();await allow(f);await loaded(f);
+ await tap(f);await tap(f);assert.equal(await contacts(f),1);
+ await decline(f);await close(f);
+});

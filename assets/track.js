@@ -190,6 +190,21 @@
         return true;
       } catch (_) { failClosed(); return false; }
     };
+    var callTracked = false;
+    document.addEventListener('click', function (event) {
+      // A tap on a phone link counts once per page, only after an explicit allow.
+      try {
+        var link = event.target && event.target.closest && event.target.closest('a[href^="tel:"]');
+        if (!link || callTracked) return;
+        refresh(false);
+        if (!permitted() || !ready) return;
+        callTracked = true;
+        window.fbq('track', 'Contact');
+        if (gaInjected && typeof window.gtag === 'function' && !window['ga-disable-' + GA_ID]) {
+          try { window.gtag('event', 'click_to_call', {link_location: link.closest('header') ? 'header' : link.closest('footer') ? 'footer' : 'page'}); } catch (_) {}
+        }
+      } catch (_) { failClosed(); }
+    }, true);
     window.addEventListener('storage', function (event) {
       if (event.key === STORAGE_KEY || event.key === null) {
         try { refresh(true); } catch (_) { failClosed(); }
