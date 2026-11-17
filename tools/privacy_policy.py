@@ -27,4 +27,4 @@ def privacy_content():
 <h2>Children</h2>
 <p>This website is intended for business owners. We do not knowingly seek information from children.</p>
 <h2>Changes and questions</h2>
-<p>We update the date above when this policy changes. For questions about this website's information handling, email <a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a> or call <a href="tel:+16606653889">(660) 665-3889</a>.</p>'''
+<p>We update the date above when this policy changes. For questions about this website's information handling, email <a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a> or call <a href="tel:+12172171705">(217) 217-1705</a>.</p>'''

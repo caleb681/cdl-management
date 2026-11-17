@@ -295,7 +295,7 @@ test('pending requests lock editing, rejected requests restore it and recovery c
   release();await p.locator('form').getByRole('status').filter({hasText:'not accepted'}).waitFor();
   assert.equal(payload.email,'qa@example.invalid');assert.equal(await p.locator('#email').isEnabled(),true);
   assert.equal(await p.locator('[type=submit]').isEnabled(),true);
-  assert.equal(await p.locator('form').getByRole('status').locator('a[href="tel:+16606653889"]').count(),1);
+  assert.equal(await p.locator('form').getByRole('status').locator('a[href="tel:+12172171705"]').count(),1);
   assert.equal(await p.locator('form').getByRole('status').locator('a[href="mailto:caleb@cdl1.net"]').count(),1);
   await p.context().close();
  }

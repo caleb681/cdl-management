@@ -116,7 +116,7 @@ function showFormStatus(status, message) {
   status.textContent = message;
   const recovery = document.createElement('span');
   recovery.className = 'form-recovery';
-  for (const [href, label] of [['tel:+16606653889', 'Call (660) 665-3889'], ['mailto:caleb@cdl1.net', 'Email caleb@cdl1.net']]) {
+  for (const [href, label] of [['tel:+12172171705', 'Call (217) 217-1705'], ['mailto:caleb@cdl1.net', 'Email caleb@cdl1.net']]) {
     const link = document.createElement('a');
     link.href = href; link.textContent = label; recovery.append(link);
   }
