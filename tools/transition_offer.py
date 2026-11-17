@@ -81,8 +81,7 @@ def marketing_scope_note():
     return (f'<div class="callout"><span class="eyebrow">Month-to-month marketing</span>'
             f'<h2>{MARKETING_HEADLINE}.</h2><p>{MARKETING_SUMMARY}</p>'
             '<p>SEO and advertising-management fees are quoted for your scope. '
-            'Advertising spend is separate and paid to the platforms. '
-            'CRM integration is planned for later.</p>'
+            'Advertising spend is separate and paid to the platforms.</p>'
             '<p>A new CDL website is not required. We first check whether your existing site and access support the agreed work. '
             '<a href="/services/">Choose the services you need.</a></p></div>')
 

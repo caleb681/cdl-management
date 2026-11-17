@@ -24,8 +24,7 @@ EXIT_SUMMARY = ('Month-to-month after launch. Cancel with 30 days’ notice, wit
                 'prorated final month. Your domain and accounts stay yours; a '
                 'portable website handover is included after setup is paid.')
 SEPARATE = ('Local SEO campaigns, ongoing AI-search work, advertising management '
-            'and licensed product tools are quoted separately. Ad spend is extra. '
-            'CRM integration is planned for later and is not included.')
+            'and licensed product tools are quoted separately. Ad spend is extra.')
 PRICE_DESCRIPTION = (f'Proposed website-only plan: {PRICE}. Marketing services and media are separate. '
                      'Review scope, care and terms before committing.')
 

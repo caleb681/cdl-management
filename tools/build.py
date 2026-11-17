@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LEGACY = ROOT / 'source/legacy'
 DOMAIN = 'https://cdlmanagement.com'
 PAGES = []
+LASTMOD = {}
+BUILD_DATE = date.today().isoformat()
 ESC = html.escape
 SERVICES = [
  ('websites','Showroom websites','A useful first visit.','Fast, clear websites that help homeowners understand your showroom and ask for help.','web'),
@@ -39,7 +41,13 @@ def header():
 def footer():
  return '''<footer class="site-footer"><div class="wrap"><div class="footer-top"><div><a class="brand" href="/"><b>CDL</b>Marketing</a><p>Marketing for flooring showrooms.<br>From people who run showrooms, too.</p><a href="tel:+16606653889">(660) 665-3889</a><br><a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a></div><nav class="footer-links" aria-label="Service links"><b>What we do</b><a href="/services/websites/">Showroom websites</a><a href="/services/local-seo/">Local SEO</a><a href="/services/paid-ads/">Google &amp; Meta ads</a><a href="/services/ai-search/">AI search visibility</a></nav><nav class="footer-links" aria-label="Company links"><b>Get to know us</b><a href="/work-samples/">Work samples</a><a href="/about/">Why CDL</a><a href="/pricing/">Pricing &amp; scope</a><a href="/switch/">Switching providers</a><a href="/guides/choosing-a-flooring-marketing-agency/">Choosing an agency</a><a href="/guides/flooring-marketing-checklist/">Marketing checklist</a><a href="/guides/your-first-marketing-review/">Your first review</a><a href="/compare/broadlume/">CDL &amp; Broadlume</a><a href="/blog/">Showroom insights</a><a href="/free-mockup/">Free homepage design</a><a href="/contact/">Contact us</a><a href="/privacy/">Privacy policy</a></nav></div><details id="privacy-choices" class="privacy-choices"><summary>Privacy choices</summary><p data-privacy-status role="status" aria-live="polite">Advertising measurement is off unless you allow it. Forms work either way.</p><div class="privacy-actions"><button type="button" class="privacy-choice" data-privacy-choice="allow" disabled>Allow advertising measurement</button><button type="button" class="privacy-choice" data-privacy-choice="decline" disabled>Decline advertising measurement</button><button type="button" class="privacy-choice" data-privacy-reload hidden>Reload to apply fully</button></div></details><div class="footer-bottom"><span>© 2026 CDL Management · CDL Marketing · Kirksville, Missouri</span><span>Showroom experience. Clear answers.</span></div></div></footer>'''
 
-ORG = {'@type':'Organization','@id':DOMAIN+'/#organization','name':'CDL Marketing','url':DOMAIN+'/','telephone':'+1-660-665-3889','email':'caleb@cdl1.net','description':'CDL Marketing is part of CDL Management in Kirksville, Missouri. We offer websites, local SEO, paid advertising and AI search visibility for flooring showrooms.'}
+ORG = {'@type':'Organization','@id':DOMAIN+'/#organization','name':'CDL Marketing','alternateName':['CDL Management','CDL Marketing for Flooring Stores'],'url':DOMAIN+'/','logo':DOMAIN+'/assets/favicon.svg','image':DOMAIN+'/assets/og-marketing-20261105.jpg','telephone':'+1-660-665-3889','email':'caleb@cdl1.net','address':{'@type':'PostalAddress','addressLocality':'Kirksville','addressRegion':'MO','addressCountry':'US'},'areaServed':{'@type':'Country','name':'United States'},'founder':{'@id':DOMAIN+'/about/#caleb-foglesong'},'knowsAbout':['Flooring store marketing','SEO for flooring companies','Local SEO for flooring stores','Flooring website design','Google Ads for flooring stores','Facebook ads for flooring stores','AI search visibility (GEO)','Google Business Profile management'],'description':'CDL Marketing is a flooring marketing agency, part of CDL Management in Kirksville, Missouri. We run our own flooring showrooms and do flooring SEO, websites, Google and Meta ads and AI search visibility for flooring stores and flooring companies across the United States. Marketing is month-to-month.'}
+
+def plain(text):
+ return re.sub(r'\s+',' ',html.unescape(re.sub('<[^>]+>','',text))).strip()
+
+def faq_schema(items):
+ return {'@type':'FAQPage','mainEntity':[{'@type':'Question','name':plain(q),'acceptedAnswer':{'@type':'Answer','text':plain(a)}} for q,a in items]}
 
 def write(path,title,description,body,schema=None,extra_scripts=()):
  url=DOMAIN+path
@@ -53,6 +61,7 @@ def write(path,title,description,body,schema=None,extra_scripts=()):
  if extra_scripts:
   out=out.replace('</head>',''.join(f'<script src="{ESC(src,quote=True)}" defer></script>' for src in extra_scripts)+'</head>')
  article_schema=next((item for item in data if item.get('@type')=='Article'),None)
+ if article_schema and article_schema.get('dateModified'):LASTMOD[path]=str(article_schema['dateModified'])[:10]
  if article_schema:
   out=out.replace('property="og:type" content="website"','property="og:type" content="article"')
   dates=''.join(f'<meta property="article:{prop}_time" content="{ESC(str(article_schema[key]),quote=True)}">' for key,prop in [('datePublished','published'),('dateModified','modified')] if article_schema.get(key))
@@ -73,13 +82,15 @@ def faqs(items):
  return '<div class="faq-list">'+''.join(f'<details><summary>{q}</summary><p>{a}</p></details>' for q,a in items)+'</div>'
 
 FAQ=[
+ ('What does a flooring marketing agency do?','A flooring marketing agency helps flooring stores and flooring companies get found and get more estimate requests: SEO, your Google Business Profile, your website, Google and Facebook ads and, now, AI search. All of these need to line up, and they have to be tuned all the time. CDL Marketing does that work for flooring stores, and we run our own flooring showrooms too.'),
  ('Who is CDL Marketing a good fit for?','Independent flooring showroom owners who want practical help with their website, local visibility or advertising. We first check your goals, market, current tools and access before recommending a scope.'),
  ('What do you offer?','Showroom websites, local SEO, Google and Meta advertising, and AI search visibility. We agree on the work you need rather than assuming every store needs every service. <a href="/services/">Explore the services.</a>'),
  ('How is CDL different from a general agency?','Our flooring-industry experience includes product questions, estimates and the work behind a sold job. <a href="/about/">See our operating background.</a>'),
  ('How long does flooring marketing take?','Timing depends on your market, starting point, access and agreed work. Ads can reach buyers while a campaign runs; organic visibility needs sustained work. The first 90 days are a planning and review period, not a promised sales result.'),
- ('Do I need to replace my website or CRM?','A new CDL website is not required. We can scope SEO or advertising around your existing site when access, compatibility and inquiry paths support the work. We assess those first. CRM integration is planned for later and is not part of our current offer. <a href="/services/flooring-crm/">Read our approach to existing systems.</a>'),
+ ('Do I need a new website?','No. A new CDL website is not required. We can do SEO or advertising around your existing site when access and inquiry paths support the work. We assess those first, and we will point out free fixes on your current site whether or not you hire us.'),
  MARKETING_FAQ,
  PLAN_FAQ,
+ ('How do flooring stores show up in ChatGPT and AI search?','AI tools pull from your website, your Google Business Profile, your reviews and other sites that mention you. Clear, consistent store facts and direct answers to real buyer questions make you easier to find and quote. <a href="/services/ai-search/">See our AI search work.</a>'),
  ('Can you guarantee rankings, AI mentions or leads?','No. We do not promise a search position, AI recommendation, lead count or sales result. We agree on deliverables and review the evidence, including gaps in tracking.'),
  ('What will I receive in the free audit?','A review of your website and local online presence, with three priority opportunities to discuss. It is a practical starting point, with no obligation to hire us.'),
 ]
@@ -102,17 +113,18 @@ def service_choices():
  </div><p class="inline-note search-note"><b>Thinking about AI search?</b> Clear store facts and helpful answers support search discovery. <a href="/services/ai-search/">Explore our separately scoped AI search work</a>.</p>'''
 
 def home():
- body=f'''<section class="hero" id="top"><div class="wrap hero-grid"><div class="hero-copy"><span class="eyebrow">{MARKETING_HEADLINE}</span><h1>Flooring marketing.<br><span>Built for the next sale.</span></h1><p class="intro">Websites, local SEO and advertising that help homeowners find your store, understand what you offer and ask for an estimate. From a team that runs showrooms, too.</p><div class="hero-actions">{link('/contact/','Get my free growth audit','btn')}{link(WORK_PATH,'See how we work')}</div><p class="hero-note">Your website + local presence. Three priorities to discuss.<br>Free, with no obligation.</p><p class="hero-note">Spoken with our team? <a href="/contact/#after-call">Pick up the conversation.</a></p></div><div class="hero-art">{portrait()}</div></div></section><div class="trust-strip"><div class="wrap trust-inner"><span>Built on flooring-industry experience</span><span>Websites</span><span>Local search</span><span>Advertising</span></div></div>
+ body=f'''<section class="hero" id="top"><div class="wrap hero-grid"><div class="hero-copy"><span class="eyebrow">{MARKETING_HEADLINE}</span><h1>Marketing for flooring stores.<br><span>Built for the next sale.</span></h1><p class="intro">CDL Marketing is a flooring marketing agency run by people who own flooring showrooms. Flooring SEO, websites, Google and Facebook ads and AI search that help homeowners find your store and ask for an estimate. Month-to-month.</p><div class="hero-actions">{link('/contact/','Get my free growth audit','btn')}{link(WORK_PATH,'See how we work')}</div><p class="hero-note">Your website + local presence. Three priorities to discuss.<br>Free, with no obligation.</p><p class="hero-note">Spoken with our team? <a href="/contact/#after-call">Pick up the conversation.</a></p></div><div class="hero-art">{portrait()}</div></div></section><div class="trust-strip"><div class="wrap trust-inner"><span>Built on flooring-industry experience</span><span>Websites</span><span>Local search</span><span>Advertising</span></div></div>
  <section class="section" id="services"><div class="wrap"><div class="section-heading"><span class="eyebrow">Choose the work your store needs</span><h2>One clear starting point.<br>Room to grow from there.</h2><p>CDL Marketing helps independent flooring showrooms with websites, local search, advertising and AI search visibility. Start with a specific problem. Each service has its own scope and costs.</p></div>{service_choices()}<p class="inline-note">You can keep a useful existing website. We check access, compatibility and inquiry paths before recommending a rebuild.</p></div></section>
  {work_preview()}
+ <section class="section light" id="approach"><div class="wrap split"><div><span class="eyebrow">Our approach is different</span><h2>No long contract.<br>Just the work.</h2><p>For too long, flooring stores have signed marketing contracts that promised a lot and never delivered. Our approach is different. If we don’t do what we say, you can let us go and move on. No waiting for a contract to end. We fight every day to keep our clients.</p><p>We’ve seen stores pay for a 12-month SEO contract and get 12 edits in 12 months. That isn’t SEO. Search, your Google listing, your website and your ads all need to line up, and they have to be tuned all the time.</p></div><div class="quote-panel"><span class="eyebrow">Think about your best installer</span><h3>The little things.<br>Every time.</h3><p>A good installer does the floor prep, patches, uses the right adhesive, vacuums and talks to the customer. That’s how they get five-star reviews. Marketing works the same way. Google changes every couple of weeks, so we check the work a few days later, not a year later, and adjust.</p><p>Your installer is the last thing a customer sees. We take care of the first: Google, Maps and what ChatGPT recommends. Nothing magical. We’re just doing the work.</p></div></div></section>
  <section class="section" id="edge"><div class="wrap split"><div id="own-stores"><span class="eyebrow">We’re in the flooring business, too</span><h2>From a product question<br>to a measure appointment.</h2><p class="muted">A flooring inquiry is the start of a real project. The shopper may need help comparing materials, understanding installation or arranging a measure. Our team operates flooring showrooms and handles marketing for our own businesses, so those decisions shape the pages and campaigns we plan.</p>{link('/about/','Meet the team behind CDL')}</div><div class="quote-panel"><span class="eyebrow">Why choose CDL?</span><h3>Flooring context.<br>A clear scope.<br>Work you can review.</h3><ul class="reason-list"><li><b>Start where the problem is.</b> Discuss a website, search or advertising scope that fits your store.</li><li><b>Keep the costs clear.</b> Separate website service, marketing fees and ad spend.</li><li><b>Stay flexible.</b> Month-to-month marketing, with scope, fees and notice in writing.</li><li><b>Ask for the evidence.</b> Review actual work, relevant inquiries and the limits of the data.</li></ul>{link('/compare/broadlume/','Compare CDL and Broadlume')}</div></div></section>
  <section class="section light"><div class="wrap"><div class="section-heading"><span class="eyebrow">From first conversation to ongoing work</span><h2>Know the next step.<br>Know what you are buying.</h2><p>We agree the scope, access and milestones before paid work begins. The first 90 days give the work a review plan.</p></div><div class="process"><article><span class="step-number">01</span><h3>Find the priority.</h3><p>Start with a free review of your website and public local presence. Discuss three priorities and what needs a closer look.</p></article><article><span class="step-number">02</span><h3>Agree the work.</h3><p>Review a written scope with deliverables, separate costs, access needs and responsibilities. Approve the plan before it starts.</p></article><article><span class="step-number">03</span><h3>See what changed.</h3><p>Review completed work and inquiry quality where records are available. Choose the next improvement from the evidence.</p></article></div><p class="inline-note">{link('/guides/your-first-marketing-review/','What to expect from your first review')}</p></div></section>
- <section class="section dark-section" id="pricing"><div class="wrap price-teaser"><div><span class="eyebrow">Proposed standalone website plan</span><h2>Your website.<br>One defined scope.</h2><div class="price-amount">{PRICE_HTML}</div><p class="scope-note">{SUMMARY}</p><p class="scope-note">Proposed terms: month-to-month after launch, 30 days’ notice and a portable website handover after setup is paid. Your domain and accounts stay yours. Confirm the final terms in writing.</p>{link('/pricing/','See the full website scope and terms')}</div><div class="price-summary" id="guarantee"><span class="eyebrow">Marketing is a separate choice</span><h3>Local SEO. Paid ads.<br>AI search visibility.</h3><p>Agree the services you need and their fees. Media spend is separate from ad management. CRM integration is planned for later.</p><p>Review the work and the results that can be verified. Search positions, AI mentions, inquiry counts and sales are not guaranteed.</p>{link('/services/','Compare the services')}</div></div></section>
+ <section class="section dark-section" id="pricing"><div class="wrap price-teaser"><div><span class="eyebrow">Proposed standalone website plan</span><h2>Your website.<br>One defined scope.</h2><div class="price-amount">{PRICE_HTML}</div><p class="scope-note">{SUMMARY}</p><p class="scope-note">Proposed terms: month-to-month after launch, 30 days’ notice and a portable website handover after setup is paid. Your domain and accounts stay yours. Confirm the final terms in writing.</p>{link('/pricing/','See the full website scope and terms')}</div><div class="price-summary" id="guarantee"><span class="eyebrow">Marketing is a separate choice</span><h3>Local SEO. Paid ads.<br>AI search visibility.</h3><p>Agree the services you need and their fees. Media spend is separate from ad management.</p><p>Review the work and the results that can be verified. Search positions, AI mentions, inquiry counts and sales are not guaranteed.</p>{link('/services/','Compare the services')}</div></div></section>
  <section class="section light"><div class="wrap split"><div><span class="eyebrow">Already with another provider?</span><h2>A careful move.<br>A clear agreement.</h2><p>We review your current agreement, useful pages, accounts and inquiry paths before planning a change. Bring the facts about your own provider.</p>{link('/guides/switching-flooring-website-providers/','Use the switching checklist')}</div><div class="callout"><h3>Explore proposed switching support</h3><p>We are reviewing monthly website-service credits for eligible transitions. Eligibility, paid marketing, setup treatment, credit limits and timing need written approval. An inquiry does not activate a credit or cancel your existing agreement.</p>{link('/switch/','Compare the proposed switching paths')}</div></div></section>
  <section class="section"><div class="wrap faq-layout"><div class="section-heading"><span class="eyebrow">Straight answers</span><h2>Before you<br>choose an agency.</h2><p>How we work, what it costs and what to expect.</p>{link('/contact/','Ask us something else')}</div>{faqs(FAQ)}</div></section>
  <section class="section light"><div class="wrap"><div class="section-heading"><span class="eyebrow">Notes from the showroom</span><h2>Useful answers.<br>No marketing lecture.</h2></div>{articles_cards()}<p class="inline-note">{link('/blog/','Read all showroom insights')}</p></div></section>
  <section class="section" id="apply"><div class="wrap contact-grid"><div class="contact-intro"><span class="eyebrow">Your free growth audit</span><h2>Three priorities.<br>A useful starting point.</h2><p>We review your website and local online presence, then identify three priority opportunities to discuss. The audit is free, with no obligation to hire us.</p><p>{link(WORK_PATH+'#audit','See an example of the review')}</p><div class="contact-links"><a href="tel:+16606653889">(660) 665-3889</a><a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a></div><p class="inline-note">Prefer to start with a design? <a href="/free-mockup/">Request a free homepage mockup.</a></p></div>{form()}</div></section>'''
- write('/','Flooring Marketing Agency | Websites, SEO & Ads | CDL','Websites, local SEO and advertising for flooring showrooms. Built on showroom experience, with month-to-month marketing. Start with a free growth audit.',body)
+ write('/','Flooring Marketing Agency | SEO & Websites for Flooring Stores | CDL','Marketing for flooring companies from people who run flooring showrooms. Flooring SEO, websites, Google and Facebook ads and AI search. Month-to-month. Free audit.',body,[faq_schema(FAQ)])
 
 ARTICLE_INFO=[('local-seo-for-flooring-stores','Local search','Local SEO for flooring stores: a practical checklist','Start with your Business Profile, consistent information and useful local pages.'),('marketing-for-flooring-stores','Showroom growth','A practical plan for showroom inquiries','How search, your website and follow-up work together.'),('flooring-store-chatgpt-ai-search','AI search','How flooring stores can show up in AI search','Clear business details and helpful answers give search services usable information.'),('google-business-profile-for-flooring-stores','Google Business Profile','A practical Business Profile checklist','Give homeowners accurate hours, a useful description and the right next step.')]
 
@@ -123,7 +135,7 @@ def articles_cards(all_posts=False):
 
 DETAIL={
  'websites': {
- 'h1':'Flooring showroom websites that help people take the next step.',
+ 'h1':'Flooring website design that helps shoppers take the next step.',
  'intro':f'Proposed standalone website plan for review: {PRICE}. A useful website for one showroom, with hosting, care and monthly updates.',
  'answer':'A flooring showroom website should quickly answer three questions: does this store have what I need, does it serve my area and how do I get help? We organize the agreed pages around those decisions.',
  'work':PLAN_NOTICE+' '+SUMMARY+' Proposed setup includes one brand direction, up to 5,000 words, 20 supplied images, two consolidated revision rounds and up to two pages formatting your supplied legal text. One standard inquiry form, search foundations, measurement setup and up to 20 agreed redirects are included. <a href="/pricing/#included">See the full build scope.</a>',
@@ -132,7 +144,7 @@ DETAIL={
  'separate':f'Proposed standalone website plan: {PRICE}. '+SEPARATE+' New pages, redesigns, integrations and bulk imports need a separate scope. Extra work is $125/hour or a written fixed quote, approved before work begins. '+EXIT_SUMMARY,
  'related':['local-seo-for-flooring-stores','marketing-for-flooring-stores']},
  'local-seo': {
- 'h1':'Local SEO for flooring stores that need to be found nearby.',
+ 'h1':'Flooring SEO that gets your store found nearby.',
  'intro':'Accurate business information and useful local pages for homeowners looking for flooring in your area.',
  'answer':'Local SEO connects an accurate Google Business Profile, a useful showroom website and consistent business information. We identify gaps in the area you really serve and agree on the work to address them.',
  'work':'Review your Business Profile, categories, services, contact information and key listings. Plan useful service and location content around actual buyer questions, with technical checks and internal links.',
@@ -141,7 +153,7 @@ DETAIL={
  'separate':'Local SEO is custom quoted. Website changes beyond the agreed scope, paid advertising, media and optional third-party tools are identified separately in the proposal.',
  'related':['local-seo-for-flooring-stores','google-business-profile-for-flooring-stores']},
  'paid-ads': {
- 'h1':'Flooring store advertising with a clear next step.',
+ 'h1':'Google and Facebook ads for flooring stores, with a clear next step.',
  'intro':'Google and Meta campaigns connected to your products, your market and the right landing page.',
  'answer':'A flooring ad should connect a relevant homeowner with a useful offer and an easy way to ask for help. We plan targeting, copy, creative and review around the scope your showroom needs.',
  'work':'Plan agreed Google or Meta campaigns, match offers to landing pages, review search terms or audience settings and adjust creative and targeting around the available lead-quality evidence.',
@@ -150,7 +162,7 @@ DETAIL={
  'separate':'Ad management is custom quoted. Media is paid separately to the platforms. Campaign scope, creative production, landing-page work and optional tools are defined before commitment.',
  'related':['marketing-for-flooring-stores']},
  'ai-search': {
- 'h1':'AI search visibility built on useful showroom facts.',
+ 'h1':'AI search for flooring stores, built on useful showroom facts.',
  'intro':'Clear, reliable information for the questions homeowners ask search engines and AI tools.',
  'answer':'AI search visibility helps search tools find and understand accurate information about your showroom. Generative engine optimization (GEO) and answer engine optimization (AEO) overlap with SEO: useful answers about products, installation, estimates and service areas, supported by clear business facts. No agency controls whether a tool recommends your store.',
  'work':'Review buyer questions, strengthen direct answers on relevant pages, align public business details and use structured data that matches visible facts. Check a documented sample of questions and record the answers and sources.',
@@ -161,10 +173,29 @@ DETAIL={
 }
 
 SERVICE_META = {
- 'websites': ('Flooring Store Website Design & Care | CDL Marketing','Flooring showroom website design with clear product pages, installation information and inquiry paths. Review the proposed build, monthly care and pricing.'),
- 'local-seo': ('Local SEO for Flooring Stores & Showrooms | CDL','Help local shoppers find and understand your flooring showroom. Review Business Profiles, useful service pages and a practical plan for measuring inquiries.'),
- 'paid-ads': ('Google & Meta Ads for Flooring Stores | CDL Marketing','Flooring advertising with relevant offers, landing pages and inquiry tracking. Review the campaign scope, management fee and separate advertising budget.'),
- 'ai-search': ('AI Search Visibility for Flooring Stores | CDL Marketing','Practical SEO, AEO and GEO work for flooring showrooms: accurate store facts, useful answers and documented AI-search observations. See the process and scope.')
+ 'websites': ('Flooring Website Design for Flooring Stores | CDL Marketing','Flooring showroom website design with clear product pages, installation information and inquiry paths. Review the proposed build, monthly care and pricing.'),
+ 'local-seo': ('Flooring SEO Company | Local SEO for Flooring Stores | CDL','Help local shoppers find and understand your flooring showroom. Review Business Profiles, useful service pages and a practical plan for measuring inquiries.'),
+ 'paid-ads': ('Google Ads & Facebook Ads for Flooring Stores | CDL Marketing','Flooring advertising with relevant offers, landing pages and inquiry tracking. Review the campaign scope, management fee and separate advertising budget.'),
+ 'ai-search': ('AI Search & GEO for Flooring Stores: ChatGPT, Google AI | CDL','Practical SEO, AEO and GEO work for flooring showrooms: accurate store facts, useful answers and documented AI-search observations. See the process and scope.')
+}
+
+SERVICE_FAQ = {
+ 'websites': [
+  ('What should a flooring store website have?','Clear product categories, your service area, real photos, installation information and an easy way to ask for an estimate or measure. It needs to load fast on a phone, because that is where most shoppers start.'),
+  ('Can you fix my current website instead of building a new one?','Yes. A new CDL website is not required. We will point out free fixes on your current site whether or not you hire us. Most of them are pretty easy fixes for us.'),
+  ('Do I own my website and domain?','Your domain and accounts stay yours. Under the proposed website plan, a portable website handover is included after setup is paid.')],
+ 'local-seo': [
+  ('What is flooring SEO?','Flooring SEO is the work that helps homeowners find your store when they search for flooring, carpet, LVP, hardwood or installation near them. It covers your Google Business Profile, your website pages, your listings and your reviews. All of these need to line up, and they need to be tuned all the time.'),
+  ('How long does SEO take for a flooring store?','Some fixes show up in weeks, like a corrected Business Profile or a page Google can finally read. Ranking for competitive searches takes steady monthly work. We check changes a few days after we make them, not a year later, and adjust.'),
+  ('Do you do SEO for commercial flooring companies?','Our focus is primarily residential, but it is also commercial. Done right, local SEO brings in commercial jobs you have not even thought about.')],
+ 'paid-ads': [
+  ('Should a flooring store run Google Ads or Facebook ads?','Usually Google for people already searching for flooring, and Facebook and Instagram to reach homeowners before they search. The right mix depends on your market, your budget and what you sell most.'),
+  ('Is ad spend included in the management fee?','No. Ad spend is paid directly to Google or Meta. Our management fee is separate and quoted for your scope.'),
+  ('How do you know if flooring ads are working?','We track calls and form inquiries back to the campaign where we can, and review lead quality with your team. A platform conversion count is not the same as a sold job, and our reporting says so.')],
+ 'ai-search': [
+  ('Can my flooring store show up in ChatGPT?','It can. ChatGPT, Google AI answers and similar tools pull from your website, your Google Business Profile, your reviews and other sites that mention you. We make those facts clear, consistent and easy to quote. No one controls whether a tool recommends a specific store.'),
+  ('What is GEO?','Generative engine optimization (GEO) is SEO for AI answers. It overlaps with regular SEO: clear answers to real buyer questions, accurate business details and structured data that matches what is on the page.'),
+  ('Is AI search separate from SEO?','Mostly no. Good SEO and AI search work use the same foundation. We add checks of the actual AI answers for your market, so you can see what is being said about your store.')],
 }
 
 def services():
@@ -181,12 +212,13 @@ def services():
    service_aside='<aside><b>Start with the service you need</b><p>A new CDL website is not required. We can use your existing site when its access, compatibility and inquiry paths support the agreed work. Any necessary changes are scoped first. This service has its own fee; advertising spend is separate.</p><a href="/pricing/">See pricing and scope</a></aside>'
    assert website_aside in body
    body=body.replace(website_aside,service_aside)
+  faq_html='<section class="section light" id="questions"><div class="wrap faq-layout"><div class="section-heading"><span class="eyebrow">Common questions</span><h2>'+label+'<br>questions.</h2></div>'+faqs(SERVICE_FAQ[slug])+'</div></section>'
+  assert body.endswith(cta())
+  body=body.removesuffix(cta())+faq_html+cta()
   title,description = SERVICE_META[slug]
-  write('/services/'+slug+'/',title,description,body,[{'@type':'Service','name':label+' for flooring showrooms','serviceType':label,'provider':{'@id':DOMAIN+'/#organization'},'url':DOMAIN+'/services/'+slug+'/','description':description}])
+  write('/services/'+slug+'/',title,description,body,[{'@type':'Service','name':label+' for flooring stores','serviceType':label,'provider':{'@id':DOMAIN+'/#organization'},'areaServed':{'@type':'Country','name':'United States'},'audience':{'@type':'BusinessAudience','name':'Flooring stores and flooring companies'},'url':DOMAIN+'/services/'+slug+'/','description':description},faq_schema(SERVICE_FAQ[slug])])
  cards=''.join(f'<article class="service-card">{icon(s[4])}<h2>{s[1]}</h2><p>{s[3]}</p>{link("/services/"+s[0]+"/","Explore "+s[1].lower())}</article>' for s in SERVICES)
  write('/services/','Flooring Marketing Services | CDL Marketing','Websites, local SEO, Google and Meta ads, and AI search visibility for independent flooring showrooms. Agree on the work your store needs.',subhero('Services','The right work.<br>For your showroom.','Start with the gaps that matter to your store. Each service has a defined scope, responsibilities and a way to review the work.','/services/')+'<section class="section"><div class="wrap cards two-cards">'+cards+'</div></section>'+cta())
- crm=subhero('Existing systems','Your existing CRM.<br>A later conversation.','Our current offer is marketing: websites, local SEO, paid advertising and AI search visibility.','/services/flooring-crm/')+'<section class="section"><div class="wrap article-layout"><h2>CRM integration is planned for later</h2><p>We are not selling a CRM or replacing your estimating, inventory, accounting or showroom software. CRM integration is not included in our current website or marketing offer.</p><p>For future work, we would first assess your existing system, access and supported connections. Any integration would need a separate agreed scope and verification. No connection is promised before that review.</p><h2>Keep the marketing scope clear</h2><p>Your team still owns customer conversations and quote follow-up. We agree on where marketing inquiries should go and review only the data we can actually access.</p><p><a href="/services/">Explore current marketing services</a> or <a href="/pricing/">review pricing and scope</a>.</p></div></section>'+cta()
- write('/services/flooring-crm/','Existing CRM & Future Integrations | CDL Marketing','CRM integration is planned for later. CDL currently offers websites and marketing services, not a CRM product or replacement for showroom business software.',crm)
 
 
 def pricing():
@@ -263,7 +295,7 @@ def main():
  ns='http://www.sitemaps.org/schemas/sitemap/0.9';ET.register_namespace('',ns)
  root=ET.Element('{'+ns+'}urlset')
  for path in PAGES:
-  item=ET.SubElement(root,'{'+ns+'}url');ET.SubElement(item,'{'+ns+'}loc').text=DOMAIN+path
+  item=ET.SubElement(root,'{'+ns+'}url');ET.SubElement(item,'{'+ns+'}loc').text=DOMAIN+path;ET.SubElement(item,'{'+ns+'}lastmod').text=LASTMOD.get(path,BUILD_DATE)
  ET.ElementTree(root).write(ROOT/'sitemap.xml',encoding='utf-8',xml_declaration=True)
  print(f'Built {len(PAGES)} public pages. No deployment performed.')
 
