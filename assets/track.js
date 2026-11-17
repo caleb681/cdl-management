@@ -1,8 +1,10 @@
-/* Optional Meta measurement. No GA4 property is configured.
+/* Optional Meta and Google Analytics measurement, off until a visitor allows it.
    Form delivery is independent of this browser-only preference. */
 (function () {
   'use strict';
   var PIXEL_ID = '1792164632076086';
+  var GA_ID = 'G-8DXWWYNGC8';
+  var gaInjected = false;
   var STORAGE_KEY = 'cdl-privacy-choice-v1';
   var MAX_AGE = 180 * 24 * 60 * 60 * 1000;
   var choice = null, failed = false, storageFailed = false;
@@ -62,6 +64,10 @@
       revoked = true;
       try { window.fbq('consent', 'revoke'); } catch (_) {}
     }
+    if (gaInjected) {
+      reloadNeeded = true;
+      window['ga-disable-' + GA_ID] = true;
+    }
   }
   function render() {
     var signal = privacySignal(), local = preview(), allowed = permitted(), message;
@@ -75,7 +81,7 @@
     else message = 'Optional advertising measurement is off until you allow it. You can use the site and forms without allowing it.';
     var canReloadOff = offStateSaved || signal || local;
     if (reloadNeeded) {
-      message += ' The Meta script was already requested on this page. We have stopped requesting new measurement events, but cannot remove an active script or retract data already sent.';
+      message += ' Measurement scripts were already requested on this page. We have stopped requesting new measurement events, but cannot remove an active script or retract data already sent.';
       message += canReloadOff ? ' Copy or finish any form details before choosing Reload to apply fully.' : ' We could not remember an off choice, so Reload to apply fully is unavailable. Resolve browser storage and save a declined choice before relying on another page to keep measurement off. Your form details remain here.';
     }
     statuses.forEach(function (element) { element.textContent = message; });
@@ -115,10 +121,27 @@
     injected = true;
     document.head.appendChild(script);
   }
+  function startAnalytics() {
+    // Independent of Meta: a blocked or failed Google script never disables the rest.
+    if (gaInjected || !permitted()) return;
+    window.dataLayer = window.dataLayer || [];
+    if (typeof window.gtag !== 'function') {
+      window.gtag = function () { window.dataLayer.push(arguments); };
+    }
+    window['ga-disable-' + GA_ID] = false;
+    window.gtag('js', new Date());
+    window.gtag('config', GA_ID);
+    var script = document.createElement('script');
+    script.async = true; script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    script.setAttribute('data-cdl-ga', '');
+    script.onerror = function () { window['ga-disable-' + GA_ID] = true; };
+    gaInjected = true;
+    document.head.appendChild(script);
+  }
   function refresh(load) {
     choice = readChoice();
     if (!permitted()) suspend();
-    else if (load) startPixel();
+    else if (load) { startPixel(); startAnalytics(); }
     render();
   }
   try {
@@ -161,6 +184,9 @@
             !['Growth Audit', 'Free Mockup'].includes(formName)) return false;
         trackedForms[formName] = true;
         window.fbq('track', 'Lead', {content_name: formName});
+        if (gaInjected && typeof window.gtag === 'function' && !window['ga-disable-' + GA_ID]) {
+          try { window.gtag('event', 'generate_lead', {form_name: formName}); } catch (_) {}
+        }
         return true;
       } catch (_) { failClosed(); return false; }
     };

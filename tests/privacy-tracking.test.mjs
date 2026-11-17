@@ -206,13 +206,22 @@ test('absent controls and disabled JavaScript cannot load tracking',async()=>{
   const f=await fixture(options);assert.equal(f.sdkRequests(),0);assert.deepEqual(await f.events(),[]);await close(f);
  }
 });
-test('privacy copy is current, distinguishes wrapper and providers, and contains no configured GA4',async()=>{
+test('privacy copy is current, distinguishes wrapper and providers, and names the consent-gated GA4',async()=>{
  const {execFileSync}=await import('node:child_process');
  const copy=execFileSync('python3',['-B','-c','from privacy_policy import privacy_content; print(privacy_content())'],{cwd:new URL('../tools/',import.meta.url),encoding:'utf8'});
- assert.match(copy,/Last updated November 5, 2026/);assert.match(copy,/Google Analytics is not currently configured/);
+ assert.match(copy,/Last updated November 17, 2026/);assert.match(copy,/same choice also allows Google Analytics/);
  assert.match(copy,/short-lived keyed identifiers/);assert.match(copy,/not every operation of Meta/);
  assert.match(copy,/Growth audit and homepage design forms send requests to our website's intake service/);
  assert.doesNotMatch(copy,/FormSubmit/i);
  assert.doesNotMatch(copy,/We only collect|process information only|reply STOP|we do not share/i);
- assert.doesNotMatch(script,/googletagmanager|gtag\(|G-[A-Z0-9]+/);
+ assert.match(script,/G-8DXWWYNGC8/);assert.doesNotMatch(script,/googletagmanager\.com\/gtm\.js/);
+});
+test('Google Analytics loads only after allow, once, and a blocked Google script leaves Meta working',async()=>{
+ const ga=f=>f.requests.filter(u=>u.startsWith('https://www.googletagmanager.com/gtag/js?id=G-8DXWWYNGC8')).length;
+ const off=await fixture();await decline(off);assert.equal(ga(off),0);await close(off);
+ const f=await fixture();await allow(f);await loaded(f);
+ await f.page.evaluate(()=>{dispatchEvent(new Event('pageshow'));dispatchEvent(new Event('focus'));});
+ assert.equal(ga(f),1);assert.equal(f.sdkRequests(),1);
+ assert.equal(await f.page.evaluate(()=>window.cdlTrackLead('Growth Audit')),true);
+ await decline(f);assert.equal(await f.page.evaluate(()=>window['ga-disable-G-8DXWWYNGC8']),true);await close(f);
 });
