@@ -47,7 +47,7 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
     for (const input of requiredInputs) input.setCustomValidity(input.value.trim() ? '' : 'Please enter a value.');
     // Match the intake policy before sending so the invalid field is identified.
     if (email) email.setCustomValidity(validEmail(email.value.trim()) ? '' : 'Enter a complete email address, such as name@example.com.');
-    if (website) website.setCustomValidity(validWebsite(website.value) ? '' : 'Enter a website address such as yourshowroom.com, or leave this optional field blank.');
+    if (website) website.setCustomValidity(validWebsite(website.value) ? '' : 'Enter a website address such as ' + (website.placeholder || 'yourshowroom.com') + ', or leave this optional field blank.');
     if (!form.reportValidity()) return;
     const values = Object.fromEntries([...new FormData(form)].map(([name, value]) => [name, String(value).trim()]));
     if (values.company_website_hp) return;
@@ -66,7 +66,7 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
     fields.disabled = true;
     fields.setAttribute('aria-busy', 'true');
     const payload = {
-      business_name: values.showroom, name: values.name, contact_name: values.name,
+      business_name: values.showroom + (form.dataset.industry ? ' (' + form.dataset.industry + ')' : ''), name: values.name, contact_name: values.name,
       email: values.email, phone: values.phone, website: normalizeWebsite(values.website),
       company_website_hp: '',
       ...(kind === 'audit' ? {city: values.city, monthly_revenue: values.revenue, biggest_goal: values.goal} : {vertical: values.vertical})
