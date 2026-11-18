@@ -18,6 +18,8 @@ def comparison_body() -> str:
 <p>Our current offer centers on <a href="/services/local-seo/">local SEO</a>, <a href="/services/paid-ads/">paid advertising</a>, <a href="/services/websites/">showroom websites</a> and <a href="/services/ai-search/">AI search visibility</a>. We agree on the work before starting.</p>
 <p><strong>No long-term marketing contract.</strong> {MARKETING_SUMMARY}</p>
 
+<p>Weighing more than two options? See <a href="/blog/broadlume-alternatives/">Broadlume alternatives for independent flooring stores</a>.</p>
+
 <h2>Choose the fit before comparing the fee</h2>
 <p>If an integrated catalog, visualizer or retail software package is central to your decision, review those tools in detail. If you want a focused marketing scope around your existing site and systems where access allows, start with the work CDL would take on. Request equivalent deliverables and separate costs before comparing proposals.</p>
 
