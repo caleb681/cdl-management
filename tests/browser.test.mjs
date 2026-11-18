@@ -488,3 +488,17 @@ test('post-call educational path works without JavaScript and does not carry pri
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  }finally{await p.context().close();}
 });
+
+test('an accepted request tells the sales system at once, with no details, and a rejected one does not',async()=>{
+ for(const ok of [true,false]){
+  const p=await page();const nudges=[];
+  await p.route('**/hq/api/records/public/website-request',r=>{nudges.push(r.request().postData());return r.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'});});
+  await p.route('**/api/intake/audit',r=>r.fulfill({status:ok?200:422,contentType:'application/json',body:ok?receipt('audit'):'{"success":false}'}));
+  await p.goto(base+'/contact/');await fill(p);await p.locator('[type=submit]').click();
+  await p.locator('form').getByRole('status').filter({hasText:ok?'We received your':'was not accepted'}).waitFor();
+  await p.waitForTimeout(300);
+  assert.equal(nudges.length,ok?1:0);
+  if(ok)assert.ok(!nudges[0],'the nudge must not carry any of the visitor\'s details');
+  await p.context().close();
+ }
+});

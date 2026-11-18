@@ -93,6 +93,9 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
       status.classList.add('form-success');
       showFormStatus(status, duplicate ? `We already received this ${requestLabel}. There is no need to send it again. Contact us below if you need to correct anything.` : `We received your ${requestLabel}. We’ll review your request and contact you about the next step.`);
       if (!duplicate) try { window.cdlTrackLead?.(kind === 'audit' ? 'Growth Audit' : 'Free Mockup'); } catch {}
+      // Tell our sales system a request just arrived so someone hears about it right away.
+      // It carries no details: the system reads the saved request itself.
+      if (!duplicate) try { navigator.sendBeacon?.('/hq/api/records/public/website-request'); } catch {}
     } catch(error) {
       uncertain = error.message !== 'rejected';
       showFormStatus(status, uncertain ? 'We could not confirm delivery. Your request may have arrived. Please call or email us before sending again. Your details remain here.' : 'Your request was not accepted. Check your details or try again later, or contact us below. Your details remain here.');
