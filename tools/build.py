@@ -42,12 +42,40 @@ def header():
 def footer():
  return '''<footer class="site-footer"><div class="wrap"><div class="footer-top"><div><a class="brand" href="/"><b>CDL</b>Marketing</a><p>Marketing for flooring showrooms.<br>From people who run showrooms, too.</p><a href="tel:+12172171705">(217) 217-1705</a><br><a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a></div><nav class="footer-links" aria-label="Service links"><b>What we do</b><a href="/services/websites/">Showroom websites</a><a href="/services/local-seo/">Local SEO</a><a href="/services/paid-ads/">Google &amp; Meta ads</a><a href="/services/ai-search/">AI search visibility</a></nav><nav class="footer-links" aria-label="Company links"><b>Get to know us</b><a href="/work-samples/">Work samples</a><a href="/about/">Why CDL</a><a href="/pricing/">Pricing &amp; scope</a><a href="/switch/">Switching providers</a><a href="/guides/choosing-a-flooring-marketing-agency/">Choosing an agency</a><a href="/guides/flooring-marketing-checklist/">Marketing checklist</a><a href="/guides/your-first-marketing-review/">Your first review</a><a href="/compare/broadlume/">CDL &amp; Broadlume</a><a href="/blog/">Showroom insights</a><a href="/free-mockup/">Free homepage design</a><a href="/contact/">Contact us</a><a href="/privacy/">Privacy policy</a></nav></div><details id="privacy-choices" class="privacy-choices"><summary>Privacy choices</summary><p data-privacy-status role="status" aria-live="polite">Advertising measurement is off unless you allow it. Forms work either way.</p><div class="privacy-actions"><button type="button" class="privacy-choice" data-privacy-choice="allow" disabled>Allow advertising measurement</button><button type="button" class="privacy-choice" data-privacy-choice="decline" disabled>Decline advertising measurement</button><button type="button" class="privacy-choice" data-privacy-reload hidden>Reload to apply fully</button></div></details><div class="footer-bottom"><span>© 2026 CDL Management · CDL Marketing · Kirksville, Missouri</span><span>Showroom experience. Clear answers.</span></div></div></footer>'''
 
+# Assisted living section. Its pages carry their own header, footer and call to action, and stay
+# off the flooring blog index and home page cards (they are not in ARTICLE_INFO).
+AL_HOME='/assisted-living/'
+AL_ARTICLES=[('senior-living-marketing','Senior living marketing guide'),('assisted-living-seo','Assisted living SEO checklist'),('senior-living-website-design','Senior living website design'),('assisted-living-marketing-ideas','Marketing ideas and a simple plan')]
+AL_SLUGS={x[0] for x in AL_ARTICLES}
+AL_CALL='<a class="btn" href="tel:+12172171705">Call (217) 217-1705</a>'
+AL_ASIDE='<aside><b>About the author</b><p>Caleb Foglesong runs CDL Marketing. His family company owns and runs local businesses, including an assisted living and memory care home.</p><a href="'+AL_HOME+'">See our assisted living marketing</a></aside><p><a href="'+AL_HOME+'">← Assisted living marketing</a></p>'
+
+def is_al(path):
+ return path==AL_HOME or (path.startswith('/blog/') and path.strip('/').split('/')[-1] in AL_SLUGS)
+
+def header_al():
+ nav=''.join(f'<a href="/blog/{s}/">{label}</a>' for s,label in AL_ARTICLES)
+ return f"""<a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap header-inner"><a class="brand" href="{AL_HOME}"><b>CDL</b>Marketing<small>Marketing for assisted living homes</small></a><nav class="desktop-nav" aria-label="Main navigation"><details class="nav-services"><summary>Guides</summary><div class="nav-popover">{nav}</div></details><a href="{AL_HOME}">What we do</a>{AL_CALL}</nav></div><details class="mobile-disclosure"><summary class="menu-toggle" aria-controls="mobile-menu">Menu <span aria-hidden="true">☰</span></summary><nav id="mobile-menu" class="mobile-nav" aria-label="Mobile navigation"><a href="{AL_HOME}">Assisted living marketing</a>{nav}<a href="tel:+12172171705">Call (217) 217-1705</a></nav></details></header>"""
+
+def footer_al():
+ out=footer()
+ out=out.replace('<a class="brand" href="/">','<a class="brand" href="'+AL_HOME+'">',1)
+ out=out.replace('Marketing for flooring showrooms.<br>From people who run showrooms, too.','Marketing for independent assisted living and memory care homes.<br>From people who run one, too.')
+ guides=''.join(f'<a href="/blog/{s}/">{label}</a>' for s,label in AL_ARTICLES)
+ links=f'<nav class="footer-links" aria-label="Assisted living guides"><b>Guides</b>{guides}</nav><nav class="footer-links" aria-label="Company links"><b>CDL Marketing</b><a href="{AL_HOME}">Assisted living marketing</a><a href="/">Flooring showroom marketing</a><a href="/privacy/">Privacy policy</a></nav>'
+ out=re.sub(r'<nav class="footer-links" aria-label="Service links">.*?</nav><nav class="footer-links" aria-label="Company links">.*?</nav>',lambda m:links,out,count=1,flags=re.S)
+ return out.replace('Showroom experience. Clear answers.','Operator experience. Clear answers.')
+
+def cta_al():
+ return '<section class="cta-band"><div class="wrap"><div><h2>Let’s look at your home’s marketing.</h2><p>Start with a free review of your website and Google listing. No pressure. No obligation.</p></div>'+AL_CALL+'</div></section>'
+
 ORG = {'@type':'Organization','@id':DOMAIN+'/#organization','name':'CDL Marketing','alternateName':['CDL Management'],'url':DOMAIN+'/','logo':DOMAIN+'/assets/logo-512.png','image':DOMAIN+'/assets/og-marketing-20261105.jpg','telephone':'+1-217-217-1705','email':'caleb@cdl1.net','address':{'@type':'PostalAddress','addressLocality':'Kirksville','addressRegion':'MO','postalCode':'63501','addressCountry':'US'},'areaServed':'US','founder':{'@id':DOMAIN+'/about/#caleb-foglesong'},'knowsAbout':['Flooring store marketing','Local SEO for flooring stores','Flooring website design','Google Ads for flooring stores','AI search visibility for flooring stores'],'description':'CDL Marketing is a marketing agency for independent flooring stores in the United States: websites, local SEO, Google and Facebook advertising and AI search visibility.','disambiguatingDescription':"A flooring store marketing agency in Kirksville, Missouri. Not connected with commercial driver's license (CDL) training, trucking or driver recruitment companies.",'contactPoint':{'@type':'ContactPoint','contactType':'sales','telephone':'+1-217-217-1705','email':'caleb@cdl1.net','areaServed':'US','availableLanguage':'English'}}
 OG_IMAGE = DOMAIN+'/assets/og-marketing-20261105.jpg'
 PAGE_META = {}
 
 def crumb_parent(path):
  # Second breadcrumb level for article and service detail pages; None for every other page.
+ if path.startswith('/blog/') and is_al(path):return ('Assisted living marketing',AL_HOME)
  if path.startswith('/blog/') and path!='/blog/':return ('Insights','/blog/')
  if path.startswith('/services/') and path!='/services/':return ('Services','/services/')
  return None
@@ -70,7 +98,7 @@ def write(path,title,description,body,schema=None,extra_scripts=()):
   crumbs.append((name,url))
   data.append({'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i,'name':n,'item':u} for i,(n,u) in enumerate(crumbs,1)]})
  schema_json=json.dumps({'@context':'https://schema.org','@graph':data},ensure_ascii=False).replace('</','<\\/')
- out=f'''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{ESC(title)}</title><meta name="description" content="{ESC(description,quote=True)}"><link rel="canonical" href="{url}"><meta name="theme-color" content="#f7f3ec"><meta property="og:type" content="website"><meta property="og:site_name" content="CDL Marketing"><meta property="og:title" content="{ESC(title,quote=True)}"><meta property="og:description" content="{ESC(description,quote=True)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{OG_IMAGE}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{ESC(title,quote=True)}"><meta name="twitter:description" content="{ESC(description,quote=True)}"><meta name="twitter:image" content="{OG_IMAGE}"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css"><script type="application/ld+json">{schema_json}</script><script src="/assets/site.js" defer></script><script src="/assets/track.js" defer></script></head><body>{header()}<main id="main" tabindex="-1">{body}</main>{footer()}</body></html>'''
+ out=f'''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{ESC(title)}</title><meta name="description" content="{ESC(description,quote=True)}"><link rel="canonical" href="{url}"><meta name="theme-color" content="#f7f3ec"><meta property="og:type" content="website"><meta property="og:site_name" content="CDL Marketing"><meta property="og:title" content="{ESC(title,quote=True)}"><meta property="og:description" content="{ESC(description,quote=True)}"><meta property="og:url" content="{url}"><meta property="og:image" content="{OG_IMAGE}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{ESC(title,quote=True)}"><meta name="twitter:description" content="{ESC(description,quote=True)}"><meta name="twitter:image" content="{OG_IMAGE}"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css"><script type="application/ld+json">{schema_json}</script><script src="/assets/site.js" defer></script><script src="/assets/track.js" defer></script></head><body>{header_al() if is_al(path) else header()}<main id="main" tabindex="-1">{body}</main>{footer_al() if is_al(path) else footer()}</body></html>'''
  if extra_scripts:
   out=out.replace('</head>',''.join(f'<script src="{ESC(src,quote=True)}" defer></script>' for src in extra_scripts)+'</head>')
  article_schema=next((item for item in data if item.get('@type')=='Article'),None)
@@ -312,6 +340,19 @@ def contact():
  body=subhero('Contact','Free flooring marketing audit.<br>Let’s talk about your showroom.','A free review of your website and local online presence, with three priority opportunities to discuss.','/contact/')+'<section class="section" id="apply"><div class="wrap contact-grid"><div class="contact-intro"><h2>A useful conversation.<br>No pressure.</h2><p>Tell us your showroom, location and website. We look at how your store appears online, where a shopper may struggle and which three opportunities deserve attention first. There is no obligation to hire us.</p><section class="callout" id="after-call"><h3>Already spoken with our team?</h3><p><a href="mailto:caleb@cdl1.net">Email Caleb</a> with your showroom name and the next step you discussed. You can ask a question or review your options before deciding to change anything.</p><p><a href="/about/">Check our background</a> · <a href="/pricing/">Review services and proposed costs</a></p><p><a href="/guides/flooring-marketing-checklist/">Note your own observations</a> or <a href="/guides/your-first-marketing-review/">prepare for the first review</a>. The checklist sends no answers.</p></section><p><a href="/work-samples/#audit">See a sample three-priority audit</a> before you request yours.</p><h3>What happens next?</h3><p>We review your website and public local presence, then discuss three priorities and any access limits. If you want to go further, the next step is a written scope with separate fees and responsibilities. No service or credit starts just because you ask.</p><p>Your name, showroom, city and email are enough to start. Your website helps us review it; phone and revenue are optional. Please do not send passwords, customer records or account credentials through this form.</p><div class="contact-links"><a href="tel:+12172171705">(217) 217-1705</a><a href="mailto:caleb@cdl1.net">caleb@cdl1.net</a></div><p class="inline-note">CDL Management · Kirksville, Missouri</p><div class="callout"><h3>Want to start with a design?</h3><p>Our free homepage mockup gives you something concrete to look at before deciding.</p>'+link('/free-mockup/','Request a free homepage design')+'</div>'+switching_contact_note()+'</div>'+form()+'</div></section>'
  write('/contact/','Free Flooring Marketing Audit | Contact CDL Marketing','Request a free growth audit for your flooring showroom. Contact CDL Marketing at (217) 217-1705 or caleb@cdl1.net. No obligation.',body)
 
+def assisted_living():
+ # Section home, written from source/pages/assisted-living/index.html.
+ old=(ROOT/'source/pages/assisted-living/index.html').read_text()
+ title=re.search(r'<title>(.*?)</title>',old,re.S)[1];desc=re.search(r'<meta name="description" content="(.*?)"',old)[1]
+ h1=re.search(r'<h1>(.*?)</h1>',old,re.S)[1];article=re.search(r'<article>(.*?)</article>',old,re.S)[1]
+ lead=re.search(r'<p>(.*?)</p>',article,re.S)
+ article=article.replace(lead[0],'',1)
+ schemas=[]
+ for raw in re.findall(r'<script type="application/ld\+json">(.*?)</script>',old,re.S):
+  obj=json.loads(raw);obj.pop('@context',None);schemas.append(obj)
+ body=subhero('Assisted living and memory care',h1,lead[1],AL_HOME,crumb='Assisted living marketing')+'<section class="section"><div class="wrap article-layout">'+article+'</div></section>'+cta_al()
+ write(AL_HOME,html.unescape(title),html.unescape(desc),body,schemas)
+
 def related_service(slug):
  if slug not in ARTICLE_SERVICE:return ''
  href,anchor=ARTICLE_SERVICE[slug]
@@ -354,7 +395,8 @@ def legacy_pages():
   meta='By Caleb Foglesong'
   if published: meta+=' · Published '+display_date(published)
   if modified and modified!=published: meta+=' · Updated '+display_date(modified)
-  body=subhero('Showroom insights',h1,'Practical guidance from the CDL Marketing team.','/blog/'+slug+'/',crumb=ESC(plain(html.unescape(title).split(' | ')[0])))+'<section class="section"><div class="wrap article-layout"><p class="article-meta">'+ESC(meta).replace('Caleb Foglesong','<a href="/about/#caleb-foglesong">Caleb Foglesong</a>')+'</p>'+article+related_service(slug)+'<aside><b>About the author</b><p>Caleb Foglesong is a third-generation flooring professional. His family company operates flooring showrooms and runs CDL Marketing.</p><a href="/about/">Learn about CDL Marketing</a></aside><p><a href="/blog/">← All flooring marketing insights</a></p></div></section>'+cta()
+  al=slug in AL_SLUGS
+  body=subhero('Assisted living marketing' if al else 'Showroom insights',h1,'Practical guidance from the CDL Marketing team.','/blog/'+slug+'/',crumb=ESC(plain(html.unescape(title).split(' | ')[0])))+'<section class="section"><div class="wrap article-layout"><p class="article-meta">'+ESC(meta).replace('Caleb Foglesong','<a href="/about/#caleb-foglesong">Caleb Foglesong</a>')+'</p>'+article+related_service(slug)+(AL_ASIDE if al else '<aside><b>About the author</b><p>Caleb Foglesong is a third-generation flooring professional. His family company operates flooring showrooms and runs CDL Marketing.</p><a href="/about/">Learn about CDL Marketing</a></aside><p><a href="/blog/">← All flooring marketing insights</a></p>')+'</div></section>'+(cta_al() if al else cta())
   write('/blog/'+slug+'/',html.unescape(title),html.unescape(desc),body,schemas)
  write('/blog/','Flooring Marketing Insights | CDL Marketing','Practical guides to flooring store marketing, local SEO, Google Business Profile and AI search from a team that operates showrooms.',subhero('Insights','Flooring marketing insights<br>from the showroom.','Practical answers to the questions flooring store owners ask about search, websites, advertising and follow-up.','/blog/')+'<section class="section"><div class="wrap">'+articles_cards(True)+'</div></section>'+cta())
  legal=privacy_content()
@@ -389,14 +431,14 @@ def llms_txt():
  # Generated from the same pages as sitemap.xml so it never goes stale.
  groups={'Services':[],'Guides and research':[],'Company':[]}
  for path in sorted(PAGES,key=lambda x:(LLMS_FIRST.index(x) if x in LLMS_FIRST else len(LLMS_FIRST))):
-  group='Services' if path=='/' or path.startswith('/services/') or path=='/pricing/' else 'Guides and research' if path.startswith(('/blog/','/guides/','/compare/')) else 'Company'
+  group='Services' if path in ('/',AL_HOME) or path.startswith('/services/') or path=='/pricing/' else 'Guides and research' if path.startswith(('/blog/','/guides/','/compare/')) else 'Company'
   title,description=PAGE_META[path]
   clean=lambda text:re.sub(r'\s+',' ',text.replace('—',', ').replace(' – ',' to ').replace('–',' to ')).strip()
   groups[group].append(f'- [{clean(title)}]({DOMAIN+path}): {clean(description)}')
  return LLMS_HEADER+''.join(f'\n## {name}\n'+'\n'.join(lines)+'\n' for name,lines in groups.items() if lines)
 
 def main():
- home();services();pricing();about();contact();legacy_pages();buyer_pages();switching();retailer_pages();work_samples()
+ home();services();pricing();about();contact();assisted_living();legacy_pages();buyer_pages();switching();retailer_pages();work_samples()
  not_found='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found | CDL Marketing</title><link rel="stylesheet" href="/assets/site.css"><script src="/assets/site.js" defer></script><script src="/assets/track.js" defer></script></head><body>'+header()+'<main id="main" tabindex="-1"><section class="section"><div class="wrap narrow"><span class="eyebrow">Page not found</span><h1>Let’s get you back<br>to the showroom.</h1><p>That page is not available. You can explore our services or contact the team.</p><p><a class="btn" href="/">Go to the homepage</a></p><p><a href="/contact/">Contact CDL Marketing</a></p></div></section></main>'+footer()+'</body></html>'
  (ROOT/'404.html').write_text(not_found)
  ns='http://www.sitemaps.org/schemas/sitemap/0.9';ET.register_namespace('',ns)
