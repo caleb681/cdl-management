@@ -1,0 +1,33 @@
+# Sent with every page and file this site serves.
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Styles and scripts keep the same file name when they change, so browsers recheck them hourly.
+/assets/site.css
+  Cache-Control: public, max-age=3600
+/assets/site.js
+  Cache-Control: public, max-age=3600
+/assets/track.js
+  Cache-Control: public, max-age=3600
+/assets/diagnostic.js
+  Cache-Control: public, max-age=3600
+
+# Pictures rarely change. A replaced picture should get a new file name.
+/assets/caleb-showroom.webp
+  Cache-Control: public, max-age=2592000
+/assets/caleb-showroom-400.webp
+  Cache-Control: public, max-age=2592000
+/assets/caleb-portrait.webp
+  Cache-Control: public, max-age=2592000
+/assets/caleb-portrait-400.webp
+  Cache-Control: public, max-age=2592000
+/assets/og-marketing-20261105.jpg
+  Cache-Control: public, max-age=2592000
+/assets/logo-512.png
+  Cache-Control: public, max-age=2592000
+/assets/favicon.svg
+  Cache-Control: public, max-age=2592000
