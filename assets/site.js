@@ -36,7 +36,7 @@ for (const form of document.querySelectorAll('[data-lead-form]')) {
   const goal = form.querySelector('[name=goal]');
   let busy = false, complete = false, uncertain = false, offlineWarning = false;
   goal?.addEventListener('change', () => {
-    if (!busy && !complete && !uncertain) button.textContent = goal.value.startsWith('Switch providers:') ? 'Request my switching review' : 'Request my free growth audit';
+    if (!busy && !complete && !uncertain) button.textContent = goal.value.startsWith('Switch providers:') ? 'Request my switching review' : form.dataset.industry ? 'Request my free marketing audit' : 'Request my free growth audit';
   });
   const requiredInputs = [...form.querySelectorAll('input[required]')];
   for (const input of requiredInputs) input.addEventListener('input', () => input.setCustomValidity(''));
