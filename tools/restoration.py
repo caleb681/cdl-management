@@ -8,7 +8,8 @@ Google Ads volume data read on 2026-11-18.
 """
 
 R = '/restoration/'
-PUBLISHED = '2026-11-18'
+PUBLISHED = '2026-11-20'
+OG = '/assets/og-restoration-20261120.jpg'
 DATA_NOTE = 'Google Ads keyword data for the United States, read November 18, 2026. Google rounds these figures.'
 
 SERVICES = [
@@ -44,6 +45,7 @@ def org(base):
  o = dict(base)
  o['knowsAbout'] = list(base['knowsAbout']) + ['Restoration company marketing', 'SEO for restoration companies', 'Water damage lead generation', 'Google Ads and Local Services Ads for restoration companies', 'Restoration company website design']
  o['description'] = 'CDL Marketing is a marketing agency for independent restoration companies and independent flooring stores in the United States: websites, local SEO, Google Ads, Local Services Ads and AI search visibility.'
+ o['image'] = base['url'].rstrip('/') + OG
  o['disambiguatingDescription'] = "A marketing agency in Kirksville, Missouri for independent restoration companies and flooring stores. Not connected with commercial driver's license (CDL) training, trucking or driver recruitment companies."
  return o
 
@@ -330,7 +332,7 @@ def article_pages(b):
   url = b.DOMAIN + path
   faq_html = '<h2 id="questions">Common questions</h2>' + b.faqs(faq)
   body = b.subhero('Restoration insights', h1, 'Practical guidance from a team that runs a restoration company.', path, crumb=b.ESC(title.split(' | ')[0])) + f'<section class="section"><div class="wrap article-layout"><p class="article-meta">By <a href="/about/#caleb-foglesong">Caleb Foglesong</a> · Published {pretty}</p>{fn(b)}{faq_html}{aside_scope()}<aside><b>About the author</b><p>Caleb Foglesong runs CDL Marketing. {OWN}</p><a href="{R}#why">Why CDL</a></aside>{keep_reading(rs, ra)}<p><a href="{R}insights/">← All restoration insights</a></p></div></section>' + cta(b)
-  schema = [{'@type': 'Article', 'headline': title.split(' | ')[0], 'description': desc, 'datePublished': PUBLISHED, 'dateModified': PUBLISHED, 'author': {'@type': 'Person', 'name': 'Caleb Foglesong', '@id': b.DOMAIN + '/about/#caleb-foglesong', 'url': b.DOMAIN + '/about/'}, 'publisher': {'@id': b.DOMAIN + '/#organization'}, 'mainEntityOfPage': {'@id': url + '#page'}, 'image': b.OG_IMAGE, 'about': 'Marketing for restoration companies'}, b.faq_schema(faq)]
+  schema = [{'@type': 'Article', 'headline': title.split(' | ')[0], 'description': desc, 'datePublished': PUBLISHED, 'dateModified': PUBLISHED, 'author': {'@type': 'Person', 'name': 'Caleb Foglesong', '@id': b.DOMAIN + '/about/#caleb-foglesong', 'url': b.DOMAIN + '/about/'}, 'publisher': {'@id': b.DOMAIN + '/#organization'}, 'mainEntityOfPage': {'@id': url + '#page'}, 'image': b.DOMAIN + OG, 'about': 'Marketing for restoration companies'}, b.faq_schema(faq)]
   b.write(path, title, desc, body, schema, section='restoration')
  cards = ''.join(f'<article class="service-card"><span class="article-type">{a[1]}</span><h2>{a[2]}</h2><p>{a[3]}</p>{b.link(R + "insights/" + a[0] + "/", "Read it")}</article>' for a in ARTICLES)
  b.write(R + 'insights/', 'Restoration Marketing Insights | CDL Marketing', 'Plain guides to restoration company marketing, water damage leads, mold leads and Facebook ads, from a team that runs its own restoration company.', b.subhero('Insights', 'Restoration marketing insights<br>from the job.', 'Straight answers for owners of water, fire and mold companies, with real numbers from our own.', R + 'insights/') + '<section class="section"><div class="wrap cards two-cards">' + cards + '</div></section>' + cta(b), section='restoration')
