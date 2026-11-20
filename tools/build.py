@@ -360,6 +360,7 @@ def assisted_living():
  schemas=[]
  for raw in re.findall(r'<script type="application/ld\+json">(.*?)</script>',old,re.S):
   obj=json.loads(raw);obj.pop('@context',None);schemas.append(obj)
+ schemas.append({'@type':'Service','@id':DOMAIN+AL_HOME+'#service','name':'Assisted living marketing','serviceType':'Marketing for assisted living and memory care homes','description':html.unescape(desc),'url':DOMAIN+AL_HOME,'provider':{'@id':DOMAIN+'/#organization'},'areaServed':{'@type':'Country','name':'United States'},'audience':{'@type':'BusinessAudience','name':'Independent assisted living and memory care homes'},'hasOfferCatalog':{'@type':'OfferCatalog','name':'Assisted living marketing services','itemListElement':[{'@type':'Offer','itemOffered':{'@type':'Service','name':n}} for n in ['Assisted living website design','Local SEO and Google Business Profile for assisted living homes','Google and Facebook ads for assisted living homes','AI search visibility for assisted living homes']]}})
  body=subhero('Assisted living and memory care',h1,lead[1],AL_HOME,crumb='Assisted living marketing')+'<section class="section"><div class="wrap article-layout">'+article+'</div></section>'+cta_al()
  write(AL_HOME,html.unescape(title),html.unescape(desc),body,schemas)
 
