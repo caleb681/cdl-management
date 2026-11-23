@@ -48,7 +48,7 @@ def footer(section=None):
 # Assisted living section. Its pages carry their own header, footer and call to action, and stay
 # off the flooring blog index and home page cards (they are not in ARTICLE_INFO).
 AL_HOME='/assisted-living/'
-AL_ARTICLES=[('senior-living-marketing','Senior living marketing guide'),('assisted-living-seo','Assisted living SEO checklist'),('senior-living-website-design','Senior living website design'),('assisted-living-marketing-ideas','Marketing ideas and a simple plan')]
+AL_ARTICLES=[('senior-living-marketing','Senior living marketing guide'),('assisted-living-seo','Assisted living SEO checklist'),('senior-living-website-design','Senior living website design'),('assisted-living-marketing-ideas','Marketing ideas and a simple plan'),('assisted-living-website-study','Assisted living website study')]
 AL_SLUGS={x[0] for x in AL_ARTICLES}
 AL_ABOUT=AL_HOME+'about/'
 AL_CALL='<a class="btn" href="tel:+12172171705">Call (217) 217-1705</a>'
